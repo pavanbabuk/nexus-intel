@@ -11,6 +11,7 @@ from app.analyzers.http_analyzer import HTTPAnalyzer
 from app.analyzers.username_analyzer import UsernameAnalyzer
 from app.analyzers.unfurl_analyzer import UnfurlAnalyzer
 from app.analyzers.origin_hunter import OriginHunterAnalyzer
+from app.analyzers.breach_sonar import BreachSonarAnalyzer
 
 ANALYZERS: List[BaseAnalyzer] = [
     DNSAnalyzer(),
@@ -20,7 +21,8 @@ ANALYZERS: List[BaseAnalyzer] = [
     HTTPAnalyzer(),
     UsernameAnalyzer(),
     UnfurlAnalyzer(),
-    OriginHunterAnalyzer()
+    OriginHunterAnalyzer(),
+    BreachSonarAnalyzer()
 ]
 
 ANALYZER_MAP: Dict[str, BaseAnalyzer] = {a.id: a for a in ANALYZERS}
