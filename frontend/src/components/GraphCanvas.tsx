@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import cytoscape, { Core, NodeSingular } from 'cytoscape';
 import { Maximize2, ZoomIn, ZoomOut, RefreshCw, Filter, Camera } from 'lucide-react';
 import { EntityNode, EntityEdge } from '../types';
+import { audioTelemetry } from '../utils/audioTelemetry';
 
 interface GraphCanvasProps {
   nodes: EntityNode[];
@@ -161,6 +162,11 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
       const nodeData = evt.target.data();
       const match = nodes.find(n => n.id === nodeData.id);
       if (match) {
+        if (match.confidence < 0.6) {
+          audioTelemetry.playWarning();
+        } else {
+          audioTelemetry.playBlip(1050);
+        }
         onSelectNode(match);
       }
     });
@@ -250,7 +256,10 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
         {/* Layout Switcher */}
         <select
           value={layoutName}
-          onChange={(e) => setLayoutName(e.target.value as any)}
+          onChange={(e) => {
+            setLayoutName(e.target.value as any);
+            audioTelemetry.playLaserSweep();
+          }}
           aria-label="Graph layout algorithm"
           className="bg-cyber-900 border border-cyber-border rounded px-2 py-1 text-xs text-slate-300 font-mono focus:outline-none cursor-pointer"
         >

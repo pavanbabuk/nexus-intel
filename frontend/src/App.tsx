@@ -6,6 +6,9 @@ import { EntityDrawer } from './components/EntityDrawer';
 import { InvestigationLogViewer } from './components/InvestigationLog';
 import { ExportModal } from './components/ExportModal';
 import { ScorecardModal } from './components/ScorecardModal';
+import { CommandConsole } from './components/CommandConsole';
+import { RadarWidget } from './components/RadarWidget';
+import { audioTelemetry } from './utils/audioTelemetry';
 import {
   InvestigationSummary,
   InvestigationDetail,
@@ -25,6 +28,10 @@ export default function App() {
   const [showScorecard, setShowScorecard] = useState(false);
   const [isLaunching, setIsLaunching] = useState(false);
   const [viewMode, setViewMode] = useState<'canvas' | 'launcher'>('launcher');
+  const [isConsoleOpen, setIsConsoleOpen] = useState(false);
+  const [isAudioActive, setIsAudioActive] = useState(() => audioTelemetry.isEnabled());
+  const [isCrtActive, setIsCrtActive] = useState(() => localStorage.getItem('nexus_crt_active') === 'true');
+  const [filterQuery, setFilterQuery] = useState('');
 
   // Load analyzers on mount
   useEffect(() => {
@@ -88,9 +95,39 @@ export default function App() {
     return () => clearInterval(interval);
   }, [activeCaseId, activeDetail?.status, fetchActiveCase]);
 
+  // Global hotkeys for Quake console (Ctrl+K, Cmd+K, or ` / ~)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsConsoleOpen(prev => !prev);
+      } else if (e.key === '`' && !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+        e.preventDefault();
+        setIsConsoleOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const handleToggleAudio = () => {
+    const next = audioTelemetry.toggle();
+    setIsAudioActive(next);
+  };
+
+  const handleToggleCrt = () => {
+    setIsCrtActive(prev => {
+      const next = !prev;
+      localStorage.setItem('nexus_crt_active', String(next));
+      if (next) audioTelemetry.playBlip(1200);
+      return next;
+    });
+  };
+
   // Launch new investigation
   const handleLaunch = async (target: string, caseName: string, enabledAnalyzers: string[]) => {
     setIsLaunching(true);
+    audioTelemetry.playChirp();
     try {
       const res = await fetch('/api/investigations', {
         method: 'POST',
@@ -109,9 +146,11 @@ export default function App() {
         setViewMode('canvas');
         setSelectedNode(null);
         setShowLogs(true); // Open timeline by default on launch
+        audioTelemetry.playBlip(1300);
       }
     } catch (err) {
       console.error('Failed to dispatch investigation', err);
+      audioTelemetry.playWarning();
     } finally {
       setIsLaunching(false);
     }
@@ -123,6 +162,15 @@ export default function App() {
     if (match) setSelectedNode(match);
   };
 
+  // Filtered nodes based on command console filter query
+  const filteredNodes = (activeDetail?.nodes || []).filter(n => {
+    if (!filterQuery) return true;
+    const q = filterQuery.toLowerCase();
+    return n.label.toLowerCase().includes(q) || n.type.toLowerCase().includes(q) || n.id.toLowerCase().includes(q);
+  });
+  const filteredNodeIds = new Set(filteredNodes.map(n => n.id));
+  const filteredEdges = (activeDetail?.edges || []).filter(e => filteredNodeIds.has(e.source) && filteredNodeIds.has(e.target));
+
   return (
     <div className="h-screen w-screen flex flex-col bg-cyber-900 text-slate-100 overflow-hidden font-sans">
       {/* Top Header */}
@@ -133,22 +181,34 @@ export default function App() {
           setActiveCaseId(id);
           setViewMode('canvas');
           setSelectedNode(null);
+          audioTelemetry.playLaserSweep();
         }}
         onNewInvestigation={() => {
           setViewMode('launcher');
           setSelectedNode(null);
+          audioTelemetry.playLaserSweep();
         }}
         onOpenExport={() => setShowExport(true)}
         onOpenScorecard={() => setShowScorecard(true)}
         scorecard={activeDetail?.scorecard}
-        nodeCount={activeDetail?.nodes.length || 0}
-        edgeCount={activeDetail?.edges.length || 0}
+        nodeCount={filteredNodes.length}
+        edgeCount={filteredEdges.length}
         showLogs={showLogs}
         onToggleLogs={() => setShowLogs(!showLogs)}
+        onOpenConsole={() => setIsConsoleOpen(true)}
+        isAudioActive={isAudioActive}
+        onToggleAudio={handleToggleAudio}
+        isCrtActive={isCrtActive}
+        onToggleCrt={handleToggleCrt}
       />
 
       {/* Main Workspace Area */}
       <main className="flex-1 relative overflow-hidden">
+        {/* Retro CRT Phosphor Scanline Overlay */}
+        {isCrtActive && (
+          <div className="fixed inset-0 crt-scanlines z-40 pointer-events-none" />
+        )}
+
         {viewMode === 'launcher' || !activeCaseId ? (
           <TargetLauncher
             onLaunch={handleLaunch}
@@ -191,16 +251,25 @@ export default function App() {
 
             {/* Interactive Graph Canvas */}
             <GraphCanvas
-              nodes={activeDetail?.nodes || []}
-              edges={activeDetail?.edges || []}
+              nodes={filteredNodes}
+              edges={filteredEdges}
               onSelectNode={setSelectedNode}
               selectedNodeId={selectedNode?.id || null}
+            />
+
+            {/* Attack Surface Radar Sonar Widget */}
+            <RadarWidget
+              nodes={filteredNodes}
+              selectedNodeId={selectedNode?.id}
+              onSelectNode={(node) => {
+                setSelectedNode(node);
+              }}
             />
 
             {/* Entity Details Slide-Out Drawer */}
             <EntityDrawer
               node={selectedNode}
-              edges={activeDetail?.edges || []}
+              edges={filteredEdges}
               onClose={() => setSelectedNode(null)}
               onSelectRelatedNode={handleSelectRelatedNode}
             />
@@ -233,6 +302,24 @@ export default function App() {
           onClose={() => setShowScorecard(false)}
         />
       )}
+
+      {/* Quake-Style Command Console (Ctrl+K or ~) */}
+      <CommandConsole
+        isOpen={isConsoleOpen}
+        onClose={() => setIsConsoleOpen(false)}
+        onLaunchScan={(target) => handleLaunch(target, '', analyzers.map(a => a.id))}
+        onFilterNodes={setFilterQuery}
+        onChangeLayout={() => {
+          audioTelemetry.playLaserSweep();
+        }}
+        onToggleCrt={handleToggleCrt}
+        isCrtActive={isCrtActive}
+        onToggleAudio={handleToggleAudio}
+        isAudioActive={isAudioActive}
+        onOpenExport={() => setShowExport(true)}
+        onOpenScorecard={() => setShowScorecard(true)}
+        onToggleLogs={() => setShowLogs(!showLogs)}
+      />
     </div>
   );
 }

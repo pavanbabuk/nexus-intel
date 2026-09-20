@@ -1,5 +1,5 @@
 import React from 'react';
-import { Network, Download, Plus, Layers, Terminal, ShieldAlert } from 'lucide-react';
+import { Network, Download, Plus, Layers, Terminal, ShieldAlert, Volume2, VolumeX, Sparkles, Command } from 'lucide-react';
 import { InvestigationSummary, SecurityScorecard } from '../types';
 
 interface HeaderProps {
@@ -14,6 +14,11 @@ interface HeaderProps {
   edgeCount: number;
   showLogs: boolean;
   onToggleLogs: () => void;
+  onOpenConsole: () => void;
+  isAudioActive: boolean;
+  onToggleAudio: () => void;
+  isCrtActive: boolean;
+  onToggleCrt: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -27,7 +32,12 @@ export const Header: React.FC<HeaderProps> = ({
   nodeCount,
   edgeCount,
   showLogs,
-  onToggleLogs
+  onToggleLogs,
+  onOpenConsole,
+  isAudioActive,
+  onToggleAudio,
+  isCrtActive,
+  onToggleCrt
 }) => {
   const activeCase = cases.find(c => c.id === activeCaseId);
 
@@ -83,7 +93,45 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
+        {/* Quake Command Console Shortcut */}
+        <button
+          onClick={onOpenConsole}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-mono rounded-lg bg-cyber-900/90 hover:bg-cyber-800 border border-cyan-500/40 text-cyan-300 hover:text-white transition-all shadow-[0_0_10px_rgba(6,182,212,0.15)]"
+          title="Open Quake Command Console (Ctrl+K or ~)"
+        >
+          <Command className="w-3.5 h-3.5 text-cyan-400" />
+          <span className="hidden md:inline font-bold">Console</span>
+          <span className="text-[10px] px-1 py-0.2 rounded bg-cyan-950 border border-cyan-500/30 text-cyan-300">⌘K</span>
+        </button>
+
+        {/* Audio HUD Synthesizer Toggle */}
+        <button
+          onClick={onToggleAudio}
+          className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-mono rounded-lg border transition-all ${
+            isAudioActive
+              ? 'bg-cyan-950/60 border-cyan-500/50 text-cyan-300 shadow-[0_0_8px_rgba(6,182,212,0.2)]'
+              : 'bg-cyber-800/80 border-cyber-border text-slate-400 hover:text-slate-200'
+          }`}
+          title={isAudioActive ? 'Audio Telemetry HUD: Online' : 'Audio Telemetry HUD: Muted'}
+        >
+          {isAudioActive ? <Volume2 className="w-3.5 h-3.5 text-cyan-400 animate-pulse" /> : <VolumeX className="w-3.5 h-3.5 text-slate-500" />}
+          <span className="hidden lg:inline text-[11px]">{isAudioActive ? 'HUD: ON' : 'MUTED'}</span>
+        </button>
+
+        {/* CRT Scanline Toggle */}
+        <button
+          onClick={onToggleCrt}
+          className={`p-1.5 text-xs rounded-lg border transition-all ${
+            isCrtActive
+              ? 'bg-amber-950/50 border-amber-500/50 text-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.2)]'
+              : 'bg-cyber-800/80 border-cyber-border text-slate-400 hover:text-slate-200'
+          }`}
+          title={`CRT Scanlines: ${isCrtActive ? 'ENABLED' : 'DISABLED'}`}
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+        </button>
+
         {activeCaseId && scorecard && onOpenScorecard && (
           <button
             onClick={onOpenScorecard}
