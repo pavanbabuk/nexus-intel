@@ -1,5 +1,5 @@
 import React from 'react';
-import { Network, Download, Plus, Layers, Terminal, ShieldAlert, Volume2, VolumeX, Sparkles, Command, Globe } from 'lucide-react';
+import { Network, Download, Plus, Layers, Terminal, ShieldAlert, Volume2, VolumeX, Sparkles, Command, Globe, Brain } from 'lucide-react';
 import { InvestigationSummary, SecurityScorecard } from '../types';
 
 interface HeaderProps {
@@ -21,6 +21,7 @@ interface HeaderProps {
   onToggleCrt: () => void;
   canvasView: 'graph' | 'globe';
   onChangeCanvasView: (mode: 'graph' | 'globe') => void;
+  onOpenCortex?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -41,7 +42,8 @@ export const Header: React.FC<HeaderProps> = ({
   isCrtActive,
   onToggleCrt,
   canvasView,
-  onChangeCanvasView
+  onChangeCanvasView,
+  onOpenCortex
 }) => {
   const activeCase = cases.find(c => c.id === activeCaseId);
 
@@ -182,6 +184,17 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <ShieldAlert className="w-4 h-4" />
             <span className="font-bold">Score: {scorecard.grade} ({scorecard.score})</span>
+          </button>
+        )}
+
+        {activeCaseId && onOpenCortex && (
+          <button
+            onClick={onOpenCortex}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono rounded-lg bg-purple-950/70 hover:bg-purple-900/80 border border-purple-500/50 text-purple-300 transition-all shadow-[0_0_12px_rgba(168,85,247,0.25)]"
+            title="Open Project CORTEX AI Autonomous Threat Profiler"
+          >
+            <Brain className="w-4 h-4 text-purple-400 animate-pulse" />
+            <span className="hidden sm:inline font-bold">CORTEX AI</span>
           </button>
         )}
 

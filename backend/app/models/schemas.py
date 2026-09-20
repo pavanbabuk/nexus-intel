@@ -114,3 +114,33 @@ class AnalyzerInfo(BaseModel):
     supported_targets: List[TargetType]
     is_passive: bool
     requires_auth: bool = False
+
+class MitreAttackTTP(BaseModel):
+    t_id: str
+    t_name: str
+    phase: str
+    severity: str
+    description: str
+    matched_assets: List[str]
+
+class ThreatHypothesis(BaseModel):
+    id: str
+    confidence: float
+    title: str
+    analysis: str
+    mitre_ref: str
+
+class ReconDork(BaseModel):
+    category: str
+    query: str
+    purpose: str
+
+class CortexReport(BaseModel):
+    target: str
+    executive_summary: str
+    risk_level: str
+    mitre_ttps: List[MitreAttackTTP]
+    hypotheses: List[ThreatHypothesis]
+    recommended_dorks: List[ReconDork]
+    generated_at: str
+

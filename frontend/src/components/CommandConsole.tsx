@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Terminal, Shield, Sparkles, Volume2, VolumeX, Eye, Shuffle, Download, X, Globe } from 'lucide-react';
+import { Terminal, Shield, Sparkles, Volume2, VolumeX, Eye, Shuffle, Download, X, Globe, Brain } from 'lucide-react';
 import { audioTelemetry } from '../utils/audioTelemetry';
 
 interface CommandConsoleProps {
@@ -16,6 +16,7 @@ interface CommandConsoleProps {
   onOpenScorecard: () => void;
   onToggleLogs: () => void;
   onSwitchView?: (view: 'graph' | 'globe') => void;
+  onOpenCortex?: () => void;
 }
 
 interface CommandSuggestion {
@@ -38,7 +39,8 @@ export const CommandConsole: React.FC<CommandConsoleProps> = ({
   onOpenExport,
   onOpenScorecard,
   onToggleLogs,
-  onSwitchView
+  onSwitchView,
+  onOpenCortex
 }) => {
   const [input, setInput] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -51,6 +53,12 @@ export const CommandConsole: React.FC<CommandConsoleProps> = ({
       syntax: ':scan <domain|ip|username|url>',
       description: 'Launch tactical autonomous recon scan against target',
       icon: <Terminal className="w-4 h-4 text-cyan-400" />
+    },
+    {
+      command: ':cortex',
+      syntax: ':cortex',
+      description: 'Open Project CORTEX AI Autonomous Threat Profiler & MITRE ATT&CK',
+      icon: <Brain className="w-4 h-4 text-purple-400" />
     },
     {
       command: ':globe',
@@ -170,6 +178,10 @@ export const CommandConsole: React.FC<CommandConsoleProps> = ({
         return;
       }
       onLaunchScan(arg);
+      onClose();
+    } else if (verb === ':cortex') {
+      if (onOpenCortex) onOpenCortex();
+      setStatusMessage('LAUNCHED PROJECT CORTEX AI PROFILER');
       onClose();
     } else if (verb === ':globe') {
       if (onSwitchView) onSwitchView('globe');

@@ -9,6 +9,7 @@ import { ScorecardModal } from './components/ScorecardModal';
 import { CommandConsole } from './components/CommandConsole';
 import { RadarWidget } from './components/RadarWidget';
 import { ThreatGlobe } from './components/ThreatGlobe';
+import { CortexModal } from './components/CortexModal';
 import { audioTelemetry } from './utils/audioTelemetry';
 import {
   InvestigationSummary,
@@ -27,6 +28,7 @@ export default function App() {
   const [showLogs, setShowLogs] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showScorecard, setShowScorecard] = useState(false);
+  const [showCortex, setShowCortex] = useState(false);
   const [isLaunching, setIsLaunching] = useState(false);
   const [viewMode, setViewMode] = useState<'canvas' | 'launcher'>('launcher');
   const [canvasView, setCanvasView] = useState<'graph' | 'globe'>('graph');
@@ -207,6 +209,7 @@ export default function App() {
           setCanvasView(mode);
           audioTelemetry.playLaserSweep();
         }}
+        onOpenCortex={() => setShowCortex(true)}
       />
 
       {/* Main Workspace Area */}
@@ -319,6 +322,15 @@ export default function App() {
         />
       )}
 
+      {/* Project CORTEX AI Autonomous Threat Profiler Modal */}
+      {activeCaseId && (
+        <CortexModal
+          investigationId={activeCaseId}
+          isOpen={showCortex}
+          onClose={() => setShowCortex(false)}
+        />
+      )}
+
       {/* Quake-Style Command Console (Ctrl+K or ~) */}
       <CommandConsole
         isOpen={isConsoleOpen}
@@ -339,6 +351,7 @@ export default function App() {
           setCanvasView(mode);
           audioTelemetry.playLaserSweep();
         }}
+        onOpenCortex={() => setShowCortex(true)}
       />
     </div>
   );

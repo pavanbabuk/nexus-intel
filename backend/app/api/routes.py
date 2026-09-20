@@ -13,10 +13,12 @@ from app.models.schemas import (
     EntityType,
     TargetType,
     EntityNode,
-    EntityEdge
+    EntityEdge,
+    CortexReport
 )
 from app.core.graph import GraphManager
 from app.core.scorecard import calculate_security_scorecard
+from app.core.cortex import generate_cortex_report
 from app.core.db import (
     save_investigation,
     get_investigation,
@@ -275,3 +277,28 @@ async def export_investigation(inv_id: str, format: str):
         }
     else:
         raise HTTPException(status_code=400, detail=f"Unsupported format '{format}'. Supported: 'json', 'stix', 'markdown'")
+
+@router.get("/investigations/{inv_id}/cortex", response_model=CortexReport)
+async def get_cortex_report(inv_id: str):
+    """Generates an autonomous Project CORTEX intelligence brief & MITRE ATT&CK breakdown."""
+    mgr = ACTIVE_GRAPHS.get(inv_id)
+    target = ""
+    nodes = []
+    edges = []
+
+    if mgr:
+        nodes = list(mgr.nodes.values())
+        edges = list(mgr.edges.values())
+        root_node = next((n for n in nodes if n.properties.get("is_root")), None)
+        target = root_node.value if root_node else inv_id
+    else:
+        record = await get_investigation(inv_id)
+        if not record:
+            raise HTTPException(status_code=404, detail="Investigation not found")
+        target = record["target"]
+        raw = record.get("graph_data", {})
+        nodes = [EntityNode(**n) for n in raw.get("nodes", [])]
+        edges = [EntityEdge(**e) for e in raw.get("edges", [])]
+
+    return generate_cortex_report(target=target, nodes=nodes, edges=edges)
+

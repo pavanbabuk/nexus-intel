@@ -94,3 +94,36 @@ export interface AnalyzerInfo {
   is_passive: boolean;
   requires_auth: boolean;
 }
+
+export interface MitreAttackTTP {
+  t_id: string;
+  t_name: string;
+  phase: string;
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  description: string;
+  matched_assets: string[];
+}
+
+export interface ThreatHypothesis {
+  id: string;
+  confidence: number;
+  title: string;
+  analysis: string;
+  mitre_ref: string;
+}
+
+export interface ReconDork {
+  category: string;
+  query: string;
+  purpose: string;
+}
+
+export interface CortexReport {
+  target: string;
+  executive_summary: string;
+  risk_level: 'LOW' | 'ELEVATED' | 'CRITICAL';
+  mitre_ttps: MitreAttackTTP[];
+  hypotheses: ThreatHypothesis[];
+  recommended_dorks: ReconDork[];
+  generated_at: string;
+}
