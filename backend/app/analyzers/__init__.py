@@ -10,6 +10,7 @@ from app.analyzers.whois_analyzer import WhoisAnalyzer
 from app.analyzers.http_analyzer import HTTPAnalyzer
 from app.analyzers.username_analyzer import UsernameAnalyzer
 from app.analyzers.unfurl_analyzer import UnfurlAnalyzer
+from app.analyzers.origin_hunter import OriginHunterAnalyzer
 
 ANALYZERS: List[BaseAnalyzer] = [
     DNSAnalyzer(),
@@ -18,7 +19,8 @@ ANALYZERS: List[BaseAnalyzer] = [
     WhoisAnalyzer(),
     HTTPAnalyzer(),
     UsernameAnalyzer(),
-    UnfurlAnalyzer()
+    UnfurlAnalyzer(),
+    OriginHunterAnalyzer()
 ]
 
 ANALYZER_MAP: Dict[str, BaseAnalyzer] = {a.id: a for a in ANALYZERS}

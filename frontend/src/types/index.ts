@@ -15,7 +15,8 @@ export type EntityType =
   | 'username'
   | 'social_profile'
   | 'technology'
-  | 'dns_record';
+  | 'dns_record'
+  | 'origin_ip';
 
 export interface EntityNode {
   id: string;

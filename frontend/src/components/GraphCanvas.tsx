@@ -26,7 +26,8 @@ const ENTITY_COLORS: Record<string, { bg: string; border: string; text: string }
   username: { bg: '#14b8a6', border: '#2dd4bf', text: '#0a0d14' },
   social_profile: { bg: '#059669', border: '#10b981', text: '#ffffff' },
   technology: { bg: '#f97316', border: '#fb923c', text: '#0a0d14' },
-  dns_record: { bg: '#475569', border: '#64748b', text: '#ffffff' }
+  dns_record: { bg: '#475569', border: '#64748b', text: '#ffffff' },
+  origin_ip: { bg: '#ef4444', border: '#fca5a5', text: '#ffffff' }
 };
 
 export const GraphCanvas: React.FC<GraphCanvasProps> = ({

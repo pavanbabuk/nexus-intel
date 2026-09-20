@@ -26,6 +26,7 @@ class EntityType(str, Enum):
     SOCIAL_PROFILE = "social_profile"
     TECHNOLOGY = "technology"
     DNS_RECORD = "dns_record"
+    ORIGIN_IP = "origin_ip"
 
 class RelationshipType(str, Enum):
     RESOLVES_TO = "RESOLVES_TO"
