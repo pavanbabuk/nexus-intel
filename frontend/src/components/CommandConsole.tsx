@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Terminal, Shield, Sparkles, Volume2, VolumeX, Eye, Shuffle, Download, X } from 'lucide-react';
+import { Terminal, Shield, Sparkles, Volume2, VolumeX, Eye, Shuffle, Download, X, Globe } from 'lucide-react';
 import { audioTelemetry } from '../utils/audioTelemetry';
 
 interface CommandConsoleProps {
@@ -15,6 +15,7 @@ interface CommandConsoleProps {
   onOpenExport: () => void;
   onOpenScorecard: () => void;
   onToggleLogs: () => void;
+  onSwitchView?: (view: 'graph' | 'globe') => void;
 }
 
 interface CommandSuggestion {
@@ -36,7 +37,8 @@ export const CommandConsole: React.FC<CommandConsoleProps> = ({
   isAudioActive,
   onOpenExport,
   onOpenScorecard,
-  onToggleLogs
+  onToggleLogs,
+  onSwitchView
 }) => {
   const [input, setInput] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -49,6 +51,18 @@ export const CommandConsole: React.FC<CommandConsoleProps> = ({
       syntax: ':scan <domain|ip|username|url>',
       description: 'Launch tactical autonomous recon scan against target',
       icon: <Terminal className="w-4 h-4 text-cyan-400" />
+    },
+    {
+      command: ':globe',
+      syntax: ':globe',
+      description: 'Switch perspective to 3D Orthographic Threat Globe',
+      icon: <Globe className="w-4 h-4 text-cyan-400" />
+    },
+    {
+      command: ':graph',
+      syntax: ':graph',
+      description: 'Switch perspective to 2D Cytoscape Graph Canvas',
+      icon: <Shuffle className="w-4 h-4 text-emerald-400" />
     },
     {
       command: ':filter',
@@ -156,6 +170,14 @@ export const CommandConsole: React.FC<CommandConsoleProps> = ({
         return;
       }
       onLaunchScan(arg);
+      onClose();
+    } else if (verb === ':globe') {
+      if (onSwitchView) onSwitchView('globe');
+      setStatusMessage('PERSPECTIVE: 3D THREAT GLOBE ONLINE');
+      onClose();
+    } else if (verb === ':graph') {
+      if (onSwitchView) onSwitchView('graph');
+      setStatusMessage('PERSPECTIVE: 2D GRAPH CANVAS ONLINE');
       onClose();
     } else if (verb === ':filter') {
       onFilterNodes(arg);

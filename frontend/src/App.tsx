@@ -8,6 +8,7 @@ import { ExportModal } from './components/ExportModal';
 import { ScorecardModal } from './components/ScorecardModal';
 import { CommandConsole } from './components/CommandConsole';
 import { RadarWidget } from './components/RadarWidget';
+import { ThreatGlobe } from './components/ThreatGlobe';
 import { audioTelemetry } from './utils/audioTelemetry';
 import {
   InvestigationSummary,
@@ -28,6 +29,7 @@ export default function App() {
   const [showScorecard, setShowScorecard] = useState(false);
   const [isLaunching, setIsLaunching] = useState(false);
   const [viewMode, setViewMode] = useState<'canvas' | 'launcher'>('launcher');
+  const [canvasView, setCanvasView] = useState<'graph' | 'globe'>('graph');
   const [isConsoleOpen, setIsConsoleOpen] = useState(false);
   const [isAudioActive, setIsAudioActive] = useState(() => audioTelemetry.isEnabled());
   const [isCrtActive, setIsCrtActive] = useState(() => localStorage.getItem('nexus_crt_active') === 'true');
@@ -200,6 +202,11 @@ export default function App() {
         onToggleAudio={handleToggleAudio}
         isCrtActive={isCrtActive}
         onToggleCrt={handleToggleCrt}
+        canvasView={canvasView}
+        onChangeCanvasView={(mode) => {
+          setCanvasView(mode);
+          audioTelemetry.playLaserSweep();
+        }}
       />
 
       {/* Main Workspace Area */}
@@ -249,13 +256,22 @@ export default function App() {
               </div>
             )}
 
-            {/* Interactive Graph Canvas */}
-            <GraphCanvas
-              nodes={filteredNodes}
-              edges={filteredEdges}
-              onSelectNode={setSelectedNode}
-              selectedNodeId={selectedNode?.id || null}
-            />
+            {/* Interactive View: 2D Graph Canvas vs 3D Threat Globe */}
+            {canvasView === 'globe' ? (
+              <ThreatGlobe
+                nodes={filteredNodes}
+                edges={filteredEdges}
+                onSelectNode={setSelectedNode}
+                selectedNodeId={selectedNode?.id || null}
+              />
+            ) : (
+              <GraphCanvas
+                nodes={filteredNodes}
+                edges={filteredEdges}
+                onSelectNode={setSelectedNode}
+                selectedNodeId={selectedNode?.id || null}
+              />
+            )}
 
             {/* Attack Surface Radar Sonar Widget */}
             <RadarWidget
@@ -319,6 +335,10 @@ export default function App() {
         onOpenExport={() => setShowExport(true)}
         onOpenScorecard={() => setShowScorecard(true)}
         onToggleLogs={() => setShowLogs(!showLogs)}
+        onSwitchView={(mode) => {
+          setCanvasView(mode);
+          audioTelemetry.playLaserSweep();
+        }}
       />
     </div>
   );

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Network, Download, Plus, Layers, Terminal, ShieldAlert, Volume2, VolumeX, Sparkles, Command } from 'lucide-react';
+import { Network, Download, Plus, Layers, Terminal, ShieldAlert, Volume2, VolumeX, Sparkles, Command, Globe } from 'lucide-react';
 import { InvestigationSummary, SecurityScorecard } from '../types';
 
 interface HeaderProps {
@@ -19,6 +19,8 @@ interface HeaderProps {
   onToggleAudio: () => void;
   isCrtActive: boolean;
   onToggleCrt: () => void;
+  canvasView: 'graph' | 'globe';
+  onChangeCanvasView: (mode: 'graph' | 'globe') => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -37,7 +39,9 @@ export const Header: React.FC<HeaderProps> = ({
   isAudioActive,
   onToggleAudio,
   isCrtActive,
-  onToggleCrt
+  onToggleCrt,
+  canvasView,
+  onChangeCanvasView
 }) => {
   const activeCase = cases.find(c => c.id === activeCaseId);
 
@@ -58,7 +62,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Case Selector & Stats */}
+      {/* Case Selector, View Switcher & Stats */}
       <div className="flex items-center gap-4">
         {cases.length > 0 && (
           <div className="flex items-center gap-2 bg-cyber-900/90 px-3 py-1.5 rounded-lg border border-cyber-border text-sm">
@@ -78,8 +82,38 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         )}
 
+        {/* Dual-View Switcher: Graph Canvas vs 3D Threat Globe */}
         {activeCase && (
-          <div className="hidden md:flex items-center gap-3 text-xs font-mono">
+          <div className="flex items-center bg-cyber-900/90 border border-cyber-border rounded-lg p-0.5 text-xs font-mono">
+            <button
+              onClick={() => onChangeCanvasView('graph')}
+              className={`px-2.5 py-1 rounded flex items-center gap-1.5 transition-all ${
+                canvasView === 'graph'
+                  ? 'bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 shadow-[0_0_8px_rgba(6,182,212,0.2)]'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title="Switch to 2D Cytoscape Graph Canvas"
+            >
+              <Network className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline font-semibold">Graph</span>
+            </button>
+            <button
+              onClick={() => onChangeCanvasView('globe')}
+              className={`px-2.5 py-1 rounded flex items-center gap-1.5 transition-all ${
+                canvasView === 'globe'
+                  ? 'bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 shadow-[0_0_8px_rgba(6,182,212,0.2)]'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title="Switch to 3D Orthographic Threat Globe"
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline font-semibold">3D Globe</span>
+            </button>
+          </div>
+        )}
+
+        {activeCase && (
+          <div className="hidden lg:flex items-center gap-3 text-xs font-mono">
             <div className="px-2.5 py-1 bg-cyber-700/50 rounded border border-cyber-border text-slate-300">
               <span className="text-slate-500 mr-1.5">Nodes:</span>
               <span className="text-cyan-400 font-bold">{nodeCount}</span>
