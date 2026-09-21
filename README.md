@@ -43,6 +43,11 @@ Designed with a high-immersion **tactical cyberpunk HUD**, it combines asynchron
 - **Passive Leak Auditing:** Scans public paste dumps and credential leak telemetry for compromised corporate emails and credentials.
 - **Malware Attribution:** Tags compromised credentials with infostealer botnet family telemetry (*RedLine, Lumma, Vidar*).
 
+### 7. 🔎 Google Hacking Database (GHDB) Recon Matrix (100% Client-Side)
+- **Zero Server Footprint & Total Privacy:** 100% browser-native execution (`window.open`) with zero server requests, proxying, or telemetry logging. Queries originate directly from the operator's browser and network.
+- **50+ Curated Tactical Dork Templates:** Categorized across 8 operational domains (*Secrets & Configs, Admin & Login Portals, Cloud Storage & Buckets, Vulnerabilities & CVEs, Directory Listing, Leaked Documents, Stack Traces, Source Code*).
+- **Multi-Engine Compilation:** Instantly re-compiles dork syntax across **Google, DuckDuckGo, Bing, GitHub Code Search, and Shodan** with 1-click clipboard copying or batch launching.
+
 ---
 
 ## 🛠 Tech Stack

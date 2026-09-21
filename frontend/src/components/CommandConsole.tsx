@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Terminal, Shield, Sparkles, Volume2, VolumeX, Eye, Shuffle, Download, X, Globe, Brain } from 'lucide-react';
+import { Terminal, Shield, Sparkles, Volume2, VolumeX, Eye, Shuffle, Download, X, Globe, Brain, Search } from 'lucide-react';
 import { audioTelemetry } from '../utils/audioTelemetry';
 
 interface CommandConsoleProps {
@@ -17,6 +17,7 @@ interface CommandConsoleProps {
   onToggleLogs: () => void;
   onSwitchView?: (view: 'graph' | 'globe') => void;
   onOpenCortex?: () => void;
+  onOpenGhdb?: () => void;
 }
 
 interface CommandSuggestion {
@@ -40,7 +41,8 @@ export const CommandConsole: React.FC<CommandConsoleProps> = ({
   onOpenScorecard,
   onToggleLogs,
   onSwitchView,
-  onOpenCortex
+  onOpenCortex,
+  onOpenGhdb
 }) => {
   const [input, setInput] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -53,6 +55,18 @@ export const CommandConsole: React.FC<CommandConsoleProps> = ({
       syntax: ':scan <domain|ip|username|url>',
       description: 'Launch tactical autonomous recon scan against target',
       icon: <Terminal className="w-4 h-4 text-cyan-400" />
+    },
+    {
+      command: ':ghdb',
+      syntax: ':ghdb',
+      description: 'Open Google Hacking Database (GHDB) Recon Matrix (100% Client-Side)',
+      icon: <Search className="w-4 h-4 text-cyan-400" />
+    },
+    {
+      command: ':dork',
+      syntax: ':dork',
+      description: 'Open Google Hacking Database (GHDB) Recon Matrix (100% Client-Side)',
+      icon: <Search className="w-4 h-4 text-cyan-400" />
     },
     {
       command: ':cortex',
@@ -178,6 +192,10 @@ export const CommandConsole: React.FC<CommandConsoleProps> = ({
         return;
       }
       onLaunchScan(arg);
+      onClose();
+    } else if (verb === ':ghdb' || verb === ':dork') {
+      if (onOpenGhdb) onOpenGhdb();
+      setStatusMessage('LAUNCHED GHDB RECON MATRIX');
       onClose();
     } else if (verb === ':cortex') {
       if (onOpenCortex) onOpenCortex();

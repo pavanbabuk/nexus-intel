@@ -1,5 +1,5 @@
 import React from 'react';
-import { Network, Download, Plus, Layers, Terminal, ShieldAlert, Volume2, VolumeX, Sparkles, Command, Globe, Brain } from 'lucide-react';
+import { Network, Download, Plus, Layers, Terminal, ShieldAlert, Volume2, VolumeX, Sparkles, Command, Globe, Brain, Search } from 'lucide-react';
 import { InvestigationSummary, SecurityScorecard } from '../types';
 
 interface HeaderProps {
@@ -22,6 +22,7 @@ interface HeaderProps {
   canvasView: 'graph' | 'globe';
   onChangeCanvasView: (mode: 'graph' | 'globe') => void;
   onOpenCortex?: () => void;
+  onOpenGhdb?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -43,7 +44,8 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleCrt,
   canvasView,
   onChangeCanvasView,
-  onOpenCortex
+  onOpenCortex,
+  onOpenGhdb
 }) => {
   const activeCase = cases.find(c => c.id === activeCaseId);
 
@@ -195,6 +197,17 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <Brain className="w-4 h-4 text-purple-400 animate-pulse" />
             <span className="hidden sm:inline font-bold">CORTEX AI</span>
+          </button>
+        )}
+
+        {onOpenGhdb && (
+          <button
+            onClick={onOpenGhdb}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono rounded-lg bg-cyan-950/70 hover:bg-cyan-900/80 border border-cyan-500/50 text-cyan-300 transition-all shadow-[0_0_12px_rgba(6,182,212,0.25)]"
+            title="Open Google Hacking Database (GHDB) Recon Matrix (100% Client-Side)"
+          >
+            <Search className="w-4 h-4 text-cyan-400" />
+            <span className="hidden sm:inline font-bold">GHDB DORKS</span>
           </button>
         )}
 

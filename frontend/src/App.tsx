@@ -10,6 +10,7 @@ import { CommandConsole } from './components/CommandConsole';
 import { RadarWidget } from './components/RadarWidget';
 import { ThreatGlobe } from './components/ThreatGlobe';
 import { CortexModal } from './components/CortexModal';
+import { GhdbModal } from './components/GhdbModal';
 import { audioTelemetry } from './utils/audioTelemetry';
 import {
   InvestigationSummary,
@@ -29,6 +30,7 @@ export default function App() {
   const [showExport, setShowExport] = useState(false);
   const [showScorecard, setShowScorecard] = useState(false);
   const [showCortex, setShowCortex] = useState(false);
+  const [showGhdb, setShowGhdb] = useState(false);
   const [isLaunching, setIsLaunching] = useState(false);
   const [viewMode, setViewMode] = useState<'canvas' | 'launcher'>('launcher');
   const [canvasView, setCanvasView] = useState<'graph' | 'globe'>('graph');
@@ -210,6 +212,7 @@ export default function App() {
           audioTelemetry.playLaserSweep();
         }}
         onOpenCortex={() => setShowCortex(true)}
+        onOpenGhdb={() => setShowGhdb(true)}
       />
 
       {/* Main Workspace Area */}
@@ -331,6 +334,13 @@ export default function App() {
         />
       )}
 
+      {/* Google Hacking Database (GHDB) 100% Client-Side Recon Matrix Modal */}
+      <GhdbModal
+        isOpen={showGhdb}
+        onClose={() => setShowGhdb(false)}
+        target={activeDetail?.target || ''}
+      />
+
       {/* Quake-Style Command Console (Ctrl+K or ~) */}
       <CommandConsole
         isOpen={isConsoleOpen}
@@ -352,6 +362,7 @@ export default function App() {
           audioTelemetry.playLaserSweep();
         }}
         onOpenCortex={() => setShowCortex(true)}
+        onOpenGhdb={() => setShowGhdb(true)}
       />
     </div>
   );
