@@ -48,6 +48,25 @@ Designed with a high-immersion **tactical cyberpunk HUD**, it combines asynchron
 - **50+ Curated Tactical Dork Templates:** Categorized across 8 operational domains (*Secrets & Configs, Admin & Login Portals, Cloud Storage & Buckets, Vulnerabilities & CVEs, Directory Listing, Leaked Documents, Stack Traces, Source Code*).
 - **Multi-Engine Compilation:** Instantly re-compiles dork syntax across **Google, DuckDuckGo, Bing, GitHub Code Search, and Shodan** with 1-click clipboard copying or batch launching.
 
+### 8. 🗖 NOC Battle Station & Multi-View Workspace (Split / PiP / Graph / Globe)
+- **Split-Screen 50/50 & PiP:** Real-time synchronized dual-view rendering Cytoscape force-directed graph alongside Three.js 3D threat globe with responsive layout physics.
+- **Ambient Tactical Signal Stream:** Streaming real-time telemetry ticker monitoring target events, MITRE TTPs, and discoveries with military timestamps.
+
+### 9. ⚡ Tactical Node Radial Action Wheel & Pivot Engine
+- **Orbital Context Menu:** Right-click or tap any node to invoke the 6-sector radial wheel (`Pivot Scan`, `Blast Radius`, `Pin Evidence`, `GHDB Dork`, `Isolate Subgraph`, `Copy Value`).
+- **Graph Blast Radius:** Calculates multi-hop reachability from exposed origin IPs/credentials and dims irrelevant infrastructure.
+
+### 10. ⏳ Forensic Time-Travel Scrubber
+- **Temporal Replay:** Interactive scrub bar allowing operators to play, pause, and scrub backward through the investigation timeline to watch the topology unfold.
+- **Keyframe Discovery Markers:** Visual pings along the scrub bar highlighting critical leak moments.
+
+### 11. 📋 Analyst Evidence Notebook & Standalone Dossier Studio
+- **Chain of Custody:** Pin key findings and categorize with tags (`CONFIRMED`, `SUSPECT`, `EXPOSED_ORIGIN`, `CREDENTIAL_LEAK`, `PIVOT_ROOT`).
+- **1-Click Declassified HTML Dossier:** Exports a self-contained, standalone single-file HTML report with dark-mode cyberpunk design, classified stamps, and evidence tables.
+
+### 12. 🎨 Multi-Palette HUD Theme Engine
+- **4 Operator HUD Themes:** Seamless 1-click toggling between **Cyberpunk Neon**, **Amber Alert NOC**, **Matrix Phosphor**, and **Obsidian Stealth** with matching Web Audio sound frequencies.
+
 ---
 
 ## 🛠 Tech Stack

@@ -1,6 +1,27 @@
 import React from 'react';
-import { Network, Download, Plus, Layers, Terminal, ShieldAlert, Volume2, VolumeX, Sparkles, Command, Globe, Brain, Search } from 'lucide-react';
+import { 
+  Network, 
+  Download, 
+  Plus, 
+  Layers, 
+  Terminal, 
+  ShieldAlert, 
+  Volume2, 
+  VolumeX, 
+  Sparkles, 
+  Command, 
+  Globe, 
+  Brain, 
+  Search,
+  Columns,
+  Maximize2,
+  Bookmark,
+  Palette
+} from 'lucide-react';
 import { InvestigationSummary, SecurityScorecard } from '../types';
+import { ThemeMode, THEMES } from '../utils/theme';
+
+export type WorkspaceLayout = 'graph' | 'globe' | 'split' | 'pip';
 
 interface HeaderProps {
   cases: InvestigationSummary[];
@@ -19,10 +40,14 @@ interface HeaderProps {
   onToggleAudio: () => void;
   isCrtActive: boolean;
   onToggleCrt: () => void;
-  canvasView: 'graph' | 'globe';
-  onChangeCanvasView: (mode: 'graph' | 'globe') => void;
+  workspaceLayout: WorkspaceLayout;
+  onChangeWorkspaceLayout: (mode: WorkspaceLayout) => void;
   onOpenCortex?: () => void;
   onOpenGhdb?: () => void;
+  onOpenNotebook?: () => void;
+  pinnedCount?: number;
+  currentTheme: ThemeMode;
+  onCycleTheme: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -42,10 +67,14 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleAudio,
   isCrtActive,
   onToggleCrt,
-  canvasView,
-  onChangeCanvasView,
+  workspaceLayout,
+  onChangeWorkspaceLayout,
   onOpenCortex,
-  onOpenGhdb
+  onOpenGhdb,
+  onOpenNotebook,
+  pinnedCount = 0,
+  currentTheme,
+  onCycleTheme
 }) => {
   const activeCase = cases.find(c => c.id === activeCaseId);
 
@@ -86,32 +115,56 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         )}
 
-        {/* Dual-View Switcher: Graph Canvas vs 3D Threat Globe */}
+        {/* Workspace Layout Switcher: Split | PiP | Graph | Globe */}
         {activeCase && (
           <div className="flex items-center bg-cyber-900/90 border border-cyber-border rounded-lg p-0.5 text-xs font-mono">
             <button
-              onClick={() => onChangeCanvasView('graph')}
-              className={`px-2.5 py-1 rounded flex items-center gap-1.5 transition-all ${
-                canvasView === 'graph'
+              onClick={() => onChangeWorkspaceLayout('split')}
+              className={`px-2 py-1 rounded flex items-center gap-1 transition-all ${
+                workspaceLayout === 'split'
+                  ? 'bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 shadow-[0_0_8px_rgba(6,182,212,0.2)]'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title="Split 50/50: 2D Graph Canvas & 3D Threat Globe"
+            >
+              <Columns className="w-3.5 h-3.5" />
+              <span className="hidden xl:inline font-semibold">Split</span>
+            </button>
+            <button
+              onClick={() => onChangeWorkspaceLayout('pip')}
+              className={`px-2 py-1 rounded flex items-center gap-1 transition-all ${
+                workspaceLayout === 'pip'
+                  ? 'bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 shadow-[0_0_8px_rgba(6,182,212,0.2)]'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title="Picture-in-Picture: Graph with Floating Mini-Globe"
+            >
+              <Maximize2 className="w-3.5 h-3.5" />
+              <span className="hidden xl:inline font-semibold">PiP</span>
+            </button>
+            <button
+              onClick={() => onChangeWorkspaceLayout('graph')}
+              className={`px-2 py-1 rounded flex items-center gap-1 transition-all ${
+                workspaceLayout === 'graph'
                   ? 'bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 shadow-[0_0_8px_rgba(6,182,212,0.2)]'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
               title="Switch to 2D Cytoscape Graph Canvas"
             >
               <Network className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline font-semibold">Graph</span>
+              <span className="hidden xl:inline font-semibold">Graph</span>
             </button>
             <button
-              onClick={() => onChangeCanvasView('globe')}
-              className={`px-2.5 py-1 rounded flex items-center gap-1.5 transition-all ${
-                canvasView === 'globe'
+              onClick={() => onChangeWorkspaceLayout('globe')}
+              className={`px-2 py-1 rounded flex items-center gap-1 transition-all ${
+                workspaceLayout === 'globe'
                   ? 'bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 shadow-[0_0_8px_rgba(6,182,212,0.2)]'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
               title="Switch to 3D Orthographic Threat Globe"
             >
               <Globe className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline font-semibold">3D Globe</span>
+              <span className="hidden xl:inline font-semibold">Globe</span>
             </button>
           </div>
         )}
@@ -170,6 +223,16 @@ export const Header: React.FC<HeaderProps> = ({
           <Sparkles className="w-3.5 h-3.5" />
         </button>
 
+        {/* Multi-Palette HUD Theme Switcher */}
+        <button
+          onClick={onCycleTheme}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-mono rounded-lg bg-cyber-900/90 hover:bg-cyber-800 border border-slate-700/80 text-slate-300 hover:text-white transition-all"
+          title={`Active HUD Theme: ${THEMES[currentTheme].name}. Click to cycle.`}
+        >
+          <Palette className="w-3.5 h-3.5" style={{ color: THEMES[currentTheme].primary }} />
+          <span className="hidden 2xl:inline text-[10px] font-bold uppercase">{THEMES[currentTheme].badge}</span>
+        </button>
+
         {activeCaseId && scorecard && onOpenScorecard && (
           <button
             onClick={onOpenScorecard}
@@ -208,6 +271,27 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <Search className="w-4 h-4 text-cyan-400" />
             <span className="hidden sm:inline font-bold">GHDB DORKS</span>
+          </button>
+        )}
+
+        {/* Analyst Notebook Drawer Button */}
+        {onOpenNotebook && (
+          <button
+            onClick={onOpenNotebook}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-mono rounded-lg border transition-all ${
+              pinnedCount > 0
+                ? 'bg-emerald-950/60 border-emerald-500/50 text-emerald-300 shadow-[0_0_8px_rgba(16,185,129,0.2)]'
+                : 'bg-cyber-800/80 border-cyber-border text-slate-400 hover:text-slate-200'
+            }`}
+            title="Open Analyst Evidence Notebook & Case Dossier Studio"
+          >
+            <Bookmark className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="hidden md:inline font-bold">Notebook</span>
+            {pinnedCount > 0 && (
+              <span className="text-[10px] px-1 py-0.2 rounded bg-emerald-900 border border-emerald-400/50 text-emerald-200 font-bold">
+                {pinnedCount}
+              </span>
+            )}
           </button>
         )}
 

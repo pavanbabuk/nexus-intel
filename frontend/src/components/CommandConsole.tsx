@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Terminal, Shield, Sparkles, Volume2, VolumeX, Eye, Shuffle, Download, X, Globe, Brain, Search } from 'lucide-react';
+import { Terminal, Shield, Sparkles, Volume2, VolumeX, Eye, Shuffle, Download, X, Globe, Brain, Search, Columns, Bookmark } from 'lucide-react';
 import { audioTelemetry } from '../utils/audioTelemetry';
 
 interface CommandConsoleProps {
@@ -15,9 +15,10 @@ interface CommandConsoleProps {
   onOpenExport: () => void;
   onOpenScorecard: () => void;
   onToggleLogs: () => void;
-  onSwitchView?: (view: 'graph' | 'globe') => void;
+  onSwitchView?: (view: 'graph' | 'globe' | 'split' | 'pip') => void;
   onOpenCortex?: () => void;
   onOpenGhdb?: () => void;
+  onOpenNotebook?: () => void;
 }
 
 interface CommandSuggestion {
@@ -42,7 +43,8 @@ export const CommandConsole: React.FC<CommandConsoleProps> = ({
   onToggleLogs,
   onSwitchView,
   onOpenCortex,
-  onOpenGhdb
+  onOpenGhdb,
+  onOpenNotebook
 }) => {
   const [input, setInput] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -55,6 +57,24 @@ export const CommandConsole: React.FC<CommandConsoleProps> = ({
       syntax: ':scan <domain|ip|username|url>',
       description: 'Launch tactical autonomous recon scan against target',
       icon: <Terminal className="w-4 h-4 text-cyan-400" />
+    },
+    {
+      command: ':split',
+      syntax: ':split',
+      description: 'Split-Screen 50/50: 2D Graph Canvas & 3D Threat Globe',
+      icon: <Columns className="w-4 h-4 text-cyan-400" />
+    },
+    {
+      command: ':pip',
+      syntax: ':pip',
+      description: 'Picture-in-Picture: Graph with Floating Mini-Globe',
+      icon: <Globe className="w-4 h-4 text-emerald-400" />
+    },
+    {
+      command: ':notebook',
+      syntax: ':notebook',
+      description: 'Open Analyst Evidence Notebook & Case Dossier Studio',
+      icon: <Bookmark className="w-4 h-4 text-emerald-400" />
     },
     {
       command: ':ghdb',
@@ -200,6 +220,18 @@ export const CommandConsole: React.FC<CommandConsoleProps> = ({
     } else if (verb === ':cortex') {
       if (onOpenCortex) onOpenCortex();
       setStatusMessage('LAUNCHED PROJECT CORTEX AI PROFILER');
+      onClose();
+    } else if (verb === ':split') {
+      if (onSwitchView) onSwitchView('split');
+      setStatusMessage('PERSPECTIVE: SPLIT-SCREEN 50/50 ONLINE');
+      onClose();
+    } else if (verb === ':pip') {
+      if (onSwitchView) onSwitchView('pip');
+      setStatusMessage('PERSPECTIVE: PICTURE-IN-PICTURE MINI-GLOBE ONLINE');
+      onClose();
+    } else if (verb === ':notebook') {
+      if (onOpenNotebook) onOpenNotebook();
+      setStatusMessage('OPENED ANALYST EVIDENCE NOTEBOOK');
       onClose();
     } else if (verb === ':globe') {
       if (onSwitchView) onSwitchView('globe');

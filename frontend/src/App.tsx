@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Header } from './components/Header';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Header, WorkspaceLayout } from './components/Header';
 import { TargetLauncher } from './components/TargetLauncher';
 import { GraphCanvas } from './components/GraphCanvas';
 import { EntityDrawer } from './components/EntityDrawer';
@@ -11,7 +11,11 @@ import { RadarWidget } from './components/RadarWidget';
 import { ThreatGlobe } from './components/ThreatGlobe';
 import { CortexModal } from './components/CortexModal';
 import { GhdbModal } from './components/GhdbModal';
+import { SignalTicker } from './components/SignalTicker';
+import { TimeTravelScrubber } from './components/TimeTravelScrubber';
+import { AnalystNotebook } from './components/AnalystNotebook';
 import { audioTelemetry } from './utils/audioTelemetry';
+import { ThemeMode, getInitialTheme, applyTheme } from './utils/theme';
 import {
   InvestigationSummary,
   InvestigationDetail,
@@ -31,9 +35,14 @@ export default function App() {
   const [showScorecard, setShowScorecard] = useState(false);
   const [showCortex, setShowCortex] = useState(false);
   const [showGhdb, setShowGhdb] = useState(false);
+  const [showNotebook, setShowNotebook] = useState(false);
+  const [pinnedNodes, setPinnedNodes] = useState<EntityNode[]>([]);
   const [isLaunching, setIsLaunching] = useState(false);
   const [viewMode, setViewMode] = useState<'canvas' | 'launcher'>('launcher');
-  const [canvasView, setCanvasView] = useState<'graph' | 'globe'>('graph');
+  const [workspaceLayout, setWorkspaceLayout] = useState<WorkspaceLayout>('graph');
+  const [currentTheme, setCurrentTheme] = useState<ThemeMode>(getInitialTheme);
+  const [timeCutoff, setTimeCutoff] = useState<number>(100);
+  const [isScrubberOpen, setIsScrubberOpen] = useState(false);
   const [isConsoleOpen, setIsConsoleOpen] = useState(false);
   const [isAudioActive, setIsAudioActive] = useState(() => audioTelemetry.isEnabled());
   const [isCrtActive, setIsCrtActive] = useState(() => localStorage.getItem('nexus_crt_active') === 'true');
@@ -168,14 +177,61 @@ export default function App() {
     if (match) setSelectedNode(match);
   };
 
-  // Filtered nodes based on command console filter query
-  const filteredNodes = (activeDetail?.nodes || []).filter(n => {
-    if (!filterQuery) return true;
-    const q = filterQuery.toLowerCase();
-    return n.label.toLowerCase().includes(q) || n.type.toLowerCase().includes(q) || n.id.toLowerCase().includes(q);
-  });
-  const filteredNodeIds = new Set(filteredNodes.map(n => n.id));
-  const filteredEdges = (activeDetail?.edges || []).filter(e => filteredNodeIds.has(e.source) && filteredNodeIds.has(e.target));
+  // Synchronize theme on change
+  useEffect(() => {
+    applyTheme(currentTheme);
+  }, [currentTheme]);
+
+  const handleCycleTheme = () => {
+    const themes: ThemeMode[] = ['cyberpunk', 'amber', 'matrix', 'stealth'];
+    const next = themes[(themes.indexOf(currentTheme) + 1) % themes.length];
+    setCurrentTheme(next);
+    applyTheme(next);
+    audioTelemetry.playLaserSweep();
+  };
+
+  const handlePinNode = (node: EntityNode) => {
+    setPinnedNodes(prev => {
+      if (prev.some(n => n.id === node.id)) return prev;
+      return [...prev, node];
+    });
+    audioTelemetry.playKeyClick();
+  };
+
+  const handleRemovePinnedNode = (nodeId: string) => {
+    setPinnedNodes(prev => prev.filter(n => n.id !== nodeId));
+  };
+
+  const handlePivot = (targetValue: string) => {
+    handleLaunch(targetValue, '', analyzers.map(a => a.id));
+  };
+
+  // 1. Time-travel scrub filtering
+  const timeSlices = useMemo(() => {
+    const all = activeDetail?.nodes || [];
+    if (timeCutoff >= 100 || all.length <= 1) return all;
+    const count = Math.max(1, Math.round((timeCutoff / 100) * all.length));
+    return all.slice(0, count);
+  }, [activeDetail?.nodes, timeCutoff]);
+
+  // 2. Command console text filtering
+  const filteredNodes = useMemo(() => {
+    return timeSlices.filter(n => {
+      if (!filterQuery) return true;
+      const q = filterQuery.toLowerCase();
+      return (
+        n.label.toLowerCase().includes(q) ||
+        n.type.toLowerCase().includes(q) ||
+        n.id.toLowerCase().includes(q) ||
+        n.value.toLowerCase().includes(q)
+      );
+    });
+  }, [timeSlices, filterQuery]);
+
+  const filteredNodeIds = useMemo(() => new Set(filteredNodes.map(n => n.id)), [filteredNodes]);
+  const filteredEdges = useMemo(() => {
+    return (activeDetail?.edges || []).filter(e => filteredNodeIds.has(e.source) && filteredNodeIds.has(e.target));
+  }, [activeDetail?.edges, filteredNodeIds]);
 
   return (
     <div className="h-screen w-screen flex flex-col bg-cyber-900 text-slate-100 overflow-hidden font-sans">
@@ -206,13 +262,25 @@ export default function App() {
         onToggleAudio={handleToggleAudio}
         isCrtActive={isCrtActive}
         onToggleCrt={handleToggleCrt}
-        canvasView={canvasView}
-        onChangeCanvasView={(mode) => {
-          setCanvasView(mode);
+        workspaceLayout={workspaceLayout}
+        onChangeWorkspaceLayout={(mode) => {
+          setWorkspaceLayout(mode);
           audioTelemetry.playLaserSweep();
         }}
         onOpenCortex={() => setShowCortex(true)}
         onOpenGhdb={() => setShowGhdb(true)}
+        onOpenNotebook={() => setShowNotebook(true)}
+        pinnedCount={pinnedNodes.length}
+        currentTheme={currentTheme}
+        onCycleTheme={handleCycleTheme}
+      />
+
+      {/* Live Tactical Signal Stream Ticker */}
+      <SignalTicker
+        logs={activeDetail?.logs || []}
+        nodes={filteredNodes}
+        onSelectNode={setSelectedNode}
+        target={activeDetail?.target}
       />
 
       {/* Main Workspace Area */}
@@ -262,8 +330,67 @@ export default function App() {
               </div>
             )}
 
-            {/* Interactive View: 2D Graph Canvas vs 3D Threat Globe */}
-            {canvasView === 'globe' ? (
+            {/* Interactive Workspace View: Split 50/50 | PiP | 3D Globe | 2D Graph */}
+            {workspaceLayout === 'split' ? (
+              <div className="w-full h-full flex flex-col md:flex-row overflow-hidden">
+                <div className="w-full md:w-1/2 h-1/2 md:h-full border-b md:border-b-0 md:border-r border-cyber-border relative">
+                  <GraphCanvas
+                    nodes={filteredNodes}
+                    edges={filteredEdges}
+                    onSelectNode={setSelectedNode}
+                    selectedNodeId={selectedNode?.id || null}
+                    onPinToNotebook={handlePinNode}
+                    onPivot={handlePivot}
+                    onOpenGhdb={() => setShowGhdb(true)}
+                  />
+                  <div className="absolute top-4 right-4 z-10 px-2 py-0.5 rounded bg-slate-950/80 border border-slate-700 text-[10px] font-mono text-cyan-400 pointer-events-none">
+                    2D GRAPH CANVAS
+                  </div>
+                </div>
+                <div className="w-full md:w-1/2 h-1/2 md:h-full relative">
+                  <ThreatGlobe
+                    nodes={filteredNodes}
+                    edges={filteredEdges}
+                    onSelectNode={setSelectedNode}
+                    selectedNodeId={selectedNode?.id || null}
+                  />
+                  <div className="absolute top-4 right-4 z-10 px-2 py-0.5 rounded bg-slate-950/80 border border-slate-700 text-[10px] font-mono text-cyan-400 pointer-events-none">
+                    3D THREAT GLOBE
+                  </div>
+                </div>
+              </div>
+            ) : workspaceLayout === 'pip' ? (
+              <div className="w-full h-full relative">
+                <GraphCanvas
+                  nodes={filteredNodes}
+                  edges={filteredEdges}
+                  onSelectNode={setSelectedNode}
+                  selectedNodeId={selectedNode?.id || null}
+                  onPinToNotebook={handlePinNode}
+                  onPivot={handlePivot}
+                  onOpenGhdb={() => setShowGhdb(true)}
+                />
+                {/* Floating Picture-in-Picture Mini-Globe */}
+                <div className="absolute top-4 right-4 w-72 h-64 sm:w-80 sm:h-72 rounded-2xl border-2 border-cyan-500/60 shadow-[0_0_25px_rgba(6,182,212,0.35)] overflow-hidden z-20 backdrop-blur-md bg-slate-950/85">
+                  <div className="absolute top-2 left-3 right-3 z-10 flex items-center justify-between text-[10px] font-mono text-cyan-300 font-bold uppercase pointer-events-none">
+                    <span>MINI-GLOBE PiP</span>
+                    <button 
+                      onClick={() => setWorkspaceLayout('globe')}
+                      className="pointer-events-auto px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 hover:border-cyan-400 text-slate-300 text-[9px]"
+                      title="Expand to Full Globe"
+                    >
+                      EXPAND
+                    </button>
+                  </div>
+                  <ThreatGlobe
+                    nodes={filteredNodes}
+                    edges={filteredEdges}
+                    onSelectNode={setSelectedNode}
+                    selectedNodeId={selectedNode?.id || null}
+                  />
+                </div>
+              </div>
+            ) : workspaceLayout === 'globe' ? (
               <ThreatGlobe
                 nodes={filteredNodes}
                 edges={filteredEdges}
@@ -276,8 +403,19 @@ export default function App() {
                 edges={filteredEdges}
                 onSelectNode={setSelectedNode}
                 selectedNodeId={selectedNode?.id || null}
+                onPinToNotebook={handlePinNode}
+                onPivot={handlePivot}
+                onOpenGhdb={() => setShowGhdb(true)}
               />
             )}
+
+            {/* Forensic Time-Travel Scrubber */}
+            <TimeTravelScrubber
+              nodes={activeDetail?.nodes || []}
+              onTimeFilterChange={setTimeCutoff}
+              isOpen={isScrubberOpen}
+              onToggle={() => setIsScrubberOpen(prev => !prev)}
+            />
 
             {/* Attack Surface Radar Sonar Widget */}
             <RadarWidget
@@ -341,6 +479,15 @@ export default function App() {
         target={activeDetail?.target || ''}
       />
 
+      {/* Analyst Evidence Notebook & Case Dossier Studio */}
+      <AnalystNotebook
+        isOpen={showNotebook}
+        onClose={() => setShowNotebook(false)}
+        pinnedNodes={pinnedNodes}
+        onRemovePinnedNode={handleRemovePinnedNode}
+        investigation={activeDetail}
+      />
+
       {/* Quake-Style Command Console (Ctrl+K or ~) */}
       <CommandConsole
         isOpen={isConsoleOpen}
@@ -358,11 +505,12 @@ export default function App() {
         onOpenScorecard={() => setShowScorecard(true)}
         onToggleLogs={() => setShowLogs(!showLogs)}
         onSwitchView={(mode) => {
-          setCanvasView(mode);
+          setWorkspaceLayout(mode as WorkspaceLayout);
           audioTelemetry.playLaserSweep();
         }}
         onOpenCortex={() => setShowCortex(true)}
         onOpenGhdb={() => setShowGhdb(true)}
+        onOpenNotebook={() => setShowNotebook(true)}
       />
     </div>
   );

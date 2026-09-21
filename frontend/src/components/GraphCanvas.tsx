@@ -1,14 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import cytoscape, { Core, NodeSingular } from 'cytoscape';
-import { Maximize2, ZoomIn, ZoomOut, RefreshCw, Filter, Camera } from 'lucide-react';
+import { Maximize2, ZoomIn, ZoomOut, RefreshCw, Filter, Camera, Crosshair, Target } from 'lucide-react';
 import { EntityNode, EntityEdge } from '../types';
 import { audioTelemetry } from '../utils/audioTelemetry';
+import { NodeRadialMenu } from './NodeRadialMenu';
 
 interface GraphCanvasProps {
   nodes: EntityNode[];
   edges: EntityEdge[];
   onSelectNode: (node: EntityNode | null) => void;
   selectedNodeId: string | null;
+  onPinToNotebook?: (node: EntityNode) => void;
+  onPivot?: (target: string) => void;
+  onOpenGhdb?: (target: string) => void;
 }
 
 const ENTITY_COLORS: Record<string, { bg: string; border: string; text: string }> = {
@@ -34,13 +38,20 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
   nodes,
   edges,
   onSelectNode,
-  selectedNodeId
+  selectedNodeId,
+  onPinToNotebook,
+  onPivot,
+  onOpenGhdb
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const cyRef = useRef<Core | null>(null);
   const [layoutName, setLayoutName] = useState<'cose' | 'concentric' | 'circle' | 'breadthfirst'>('cose');
   const [activeFilters, setActiveFilters] = useState<Record<string, boolean>>({});
   const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const [radialMenu, setRadialMenu] = useState<{
+    node: EntityNode;
+    position: { x: number; y: number };
+  } | null>(null);
 
   // Initialize entity filters
   useEffect(() => {
@@ -147,6 +158,29 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
             'target-arrow-color': '#00f2fe',
             'width': 2.5
           }
+        },
+        {
+          selector: '.dimmed',
+          style: {
+            opacity: 0.18
+          }
+        },
+        {
+          selector: 'node.highlighted',
+          style: {
+            'border-width': 4,
+            'border-color': '#00f2fe',
+            opacity: 1
+          }
+        },
+        {
+          selector: 'edge.highlighted',
+          style: {
+            'line-color': '#00f2fe',
+            'target-arrow-color': '#00f2fe',
+            'width': 2.5,
+            opacity: 1
+          }
         }
       ],
       layout: {
@@ -172,9 +206,26 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
       }
     });
 
+    cy.on('cxttap', 'node', (evt) => {
+      const nodeData = evt.target.data();
+      const match = nodes.find(n => n.id === nodeData.id);
+      if (match && containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const rp = evt.renderedPosition;
+        setRadialMenu({
+          node: match,
+          position: {
+            x: rect.left + rp.x,
+            y: rect.top + rp.y
+          }
+        });
+      }
+    });
+
     cy.on('tap', (evt) => {
       if (evt.target === cy) {
         onSelectNode(null);
+        cy.elements().removeClass('highlighted dimmed');
       }
     });
 
@@ -217,6 +268,45 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
 
   const toggleFilter = (type: string) => {
     setActiveFilters(prev => ({ ...prev, [type]: !prev[type] }));
+  };
+
+  const handleBlastRadius = (nodeId: string) => {
+    if (!cyRef.current) return;
+    const target = cyRef.current.getElementById(nodeId);
+    if (!target.length) return;
+    const neighborhood = target.neighborhood().add(target).neighborhood().add(target);
+    cyRef.current.elements().removeClass('highlighted dimmed');
+    cyRef.current.elements().not(neighborhood).addClass('dimmed');
+    neighborhood.addClass('highlighted');
+    audioTelemetry.playLaserSweep();
+  };
+
+  const handleIsolate = (nodeId: string) => {
+    if (!cyRef.current) return;
+    const target = cyRef.current.getElementById(nodeId);
+    if (!target.length) return;
+    const neighborhood = target.neighborhood().add(target);
+    cyRef.current.elements().removeClass('highlighted dimmed');
+    cyRef.current.elements().not(neighborhood).addClass('dimmed');
+    neighborhood.addClass('highlighted');
+    audioTelemetry.playBlip(1200);
+  };
+
+  const handleOpenRadialForSelected = () => {
+    if (!selectedNodeId || !cyRef.current || !containerRef.current) return;
+    const target = cyRef.current.getElementById(selectedNodeId);
+    if (!target.length) return;
+    const match = nodes.find(n => n.id === selectedNodeId);
+    if (!match) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const rp = target.renderedPosition();
+    setRadialMenu({
+      node: match,
+      position: {
+        x: rect.left + rp.x,
+        y: rect.top + rp.y
+      }
+    });
   };
 
   return (
@@ -289,6 +379,28 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
         >
           <Camera className="w-4 h-4" />
         </button>
+
+        {selectedNodeId && (
+          <>
+            <div className="w-[1px] h-4 bg-cyber-border mx-1" />
+            <button
+              onClick={handleOpenRadialForSelected}
+              className="flex items-center gap-1 px-2 py-1 rounded bg-cyan-950 border border-cyan-500/50 text-cyan-300 text-xs font-bold hover:bg-cyan-900 transition-colors shadow-[0_0_8px_rgba(6,182,212,0.3)]"
+              title="Open Tactical Node Radial Action Wheel"
+            >
+              <Crosshair className="w-3.5 h-3.5 text-cyan-400 animate-spin" style={{ animationDuration: '6s' }} />
+              <span className="hidden sm:inline">Radial Wheel</span>
+            </button>
+            <button
+              onClick={() => handleBlastRadius(selectedNodeId)}
+              className="flex items-center gap-1 px-2 py-1 rounded bg-amber-950 border border-amber-500/50 text-amber-300 text-xs font-bold hover:bg-amber-900 transition-colors shadow-[0_0_8px_rgba(245,158,11,0.3)]"
+              title="Calculate & Highlight Graph Blast Radius"
+            >
+              <Target className="w-3.5 h-3.5 text-amber-400" />
+              <span className="hidden sm:inline">Blast Radius</span>
+            </button>
+          </>
+        )}
       </div>
 
       {/* Filter Dropdown */}
@@ -321,6 +433,26 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
 
       {/* Main Cytoscape Canvas Container */}
       <div ref={containerRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
+
+      {/* Tactical Node Radial Action Wheel Overlay */}
+      {radialMenu && (
+        <NodeRadialMenu
+          node={radialMenu.node}
+          position={radialMenu.position}
+          onClose={() => setRadialMenu(null)}
+          onPivot={(val) => {
+            if (onPivot) onPivot(val);
+          }}
+          onBlastRadius={(id) => handleBlastRadius(id)}
+          onPinToNotebook={(node) => {
+            if (onPinToNotebook) onPinToNotebook(node);
+          }}
+          onOpenGhdb={(val) => {
+            if (onOpenGhdb) onOpenGhdb(val);
+          }}
+          onIsolate={(id) => handleIsolate(id)}
+        />
+      )}
     </div>
   );
 };
