@@ -8,11 +8,19 @@ echo "=========================================================="
 echo "    🚀 Starting NexusIntel OSINT Intelligence Platform    "
 echo "=========================================================="
 
-# Check virtual environment
-if [ ! -d "venv" ]; then
+# Detect best Python environment
+VENV_DIR="venv"
+if [ -d "venv311" ]; then
+    VENV_DIR="venv311"
+elif [ ! -d "venv" ]; then
     echo "Creating Python virtual environment..."
-    python3 -m venv venv
-    ./venv/bin/pip install -r backend/requirements.txt
+    if command -v python3.11 >/dev/null 2>&1; then
+        python3.11 -m venv venv311
+        VENV_DIR="venv311"
+    else
+        python3 -m venv venv
+    fi
+    ./${VENV_DIR}/bin/pip install -r backend/requirements.txt
 fi
 
 # Check frontend build
@@ -27,4 +35,4 @@ echo "Interactive Swagger API: http://localhost:8000/docs"
 echo "Hit Ctrl+C to terminate."
 echo ""
 
-PYTHONPATH=backend ./venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
+PYTHONPATH=backend ./${VENV_DIR}/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
