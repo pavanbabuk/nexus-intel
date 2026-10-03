@@ -17,7 +17,9 @@ import {
   Maximize2,
   Bookmark,
   Palette,
-  Share2
+  Share2,
+  Swords,
+  Link2
 } from 'lucide-react';
 import { InvestigationSummary, SecurityScorecard } from '../types';
 import { ThemeMode, THEMES } from '../utils/theme';
@@ -29,6 +31,8 @@ interface HeaderProps {
   activeCaseId: string | null;
   onSelectCase: (id: string) => void;
   onNewInvestigation: () => void;
+  onOpenDuel?: () => void;
+  onCopyPermalink?: () => void;
   onOpenExport: () => void;
   onOpenScorecard?: () => void;
   scorecard?: SecurityScorecard;
@@ -57,6 +61,8 @@ export const Header: React.FC<HeaderProps> = ({
   activeCaseId,
   onSelectCase,
   onNewInvestigation,
+  onOpenDuel,
+  onCopyPermalink,
   onOpenExport,
   onOpenScorecard,
   scorecard,
@@ -295,6 +301,30 @@ export const Header: React.FC<HeaderProps> = ({
                 {pinnedCount}
               </span>
             )}
+          </button>
+        )}
+
+        {/* Head-to-Head Cyber Duel Button */}
+        {onOpenDuel && (
+          <button
+            onClick={onOpenDuel}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono rounded-lg bg-gradient-to-r from-rose-950/90 to-amber-950/90 hover:from-rose-900 hover:to-amber-900 border border-rose-500/50 text-rose-200 hover:text-white transition-all shadow-[0_0_12px_rgba(244,63,94,0.25)]"
+            title="Launch Head-to-Head Cyber Duel Mode (Tale of the Tape confrontation)"
+          >
+            <Swords className="w-3.5 h-3.5 text-rose-400 animate-pulse" />
+            <span className="hidden sm:inline font-bold">DUEL</span>
+          </button>
+        )}
+
+        {/* Zero-Backend Shareable Permalink Button */}
+        {activeCaseId && onCopyPermalink && (
+          <button
+            onClick={onCopyPermalink}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono rounded-lg bg-cyan-950/70 hover:bg-cyan-900/80 border border-cyan-500/50 text-cyan-300 hover:text-white transition-all shadow-[0_0_10px_rgba(6,182,212,0.2)]"
+            title="Copy Zero-Backend Interactive Permalink (100% Client-Side hydrated URL)"
+          >
+            <Link2 className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="hidden md:inline font-bold">PERMALINK</span>
           </button>
         )}
 

@@ -15,8 +15,10 @@ import { SignalTicker } from './components/SignalTicker';
 import { TimeTravelScrubber } from './components/TimeTravelScrubber';
 import { AnalystNotebook } from './components/AnalystNotebook';
 import { SocialShareModal } from './components/SocialShareModal';
+import { CyberDuelModal } from './components/CyberDuelModal';
 import { audioTelemetry } from './utils/audioTelemetry';
 import { ThemeMode, getInitialTheme, applyTheme } from './utils/theme';
+import { decompressInvestigation, generatePermalinkUrl } from './utils/permalink';
 import {
   InvestigationSummary,
   InvestigationDetail,
@@ -38,6 +40,10 @@ export default function App() {
   const [showGhdb, setShowGhdb] = useState(false);
   const [showNotebook, setShowNotebook] = useState(false);
   const [showSocialModal, setShowSocialModal] = useState(false);
+  const [showDuelModal, setShowDuelModal] = useState(false);
+  const [duelDetailA, setDuelDetailA] = useState<InvestigationDetail | null>(null);
+  const [duelDetailB, setDuelDetailB] = useState<InvestigationDetail | null>(null);
+  const [permalinkNotification, setPermalinkNotification] = useState<string | null>(null);
   const [pinnedNodes, setPinnedNodes] = useState<EntityNode[]>([]);
   const [isLaunching, setIsLaunching] = useState(false);
   const [viewMode, setViewMode] = useState<'canvas' | 'launcher'>('launcher');
@@ -56,6 +62,41 @@ export default function App() {
       .then(res => res.json())
       .then(data => setAnalyzers(data))
       .catch(err => console.error('Failed to load analyzers', err));
+  }, []);
+
+  // Zero-Backend Permalink Hydration from URL Hash (#/share=... or #share=...)
+  useEffect(() => {
+    const handleHash = async () => {
+      const hash = window.location.hash;
+      if (hash.startsWith('#/share=') || hash.startsWith('#share=') || hash.startsWith('#/view=')) {
+        const payload = hash.replace(/^#\/?(share|view)=/, '');
+        if (!payload) return;
+        const decoded = await decompressInvestigation(payload);
+        if (decoded) {
+          setActiveDetail(decoded);
+          setActiveCaseId(decoded.id);
+          setViewMode('canvas');
+          audioTelemetry.playLaserSweep();
+          setCases(prev => {
+            if (prev.some(c => c.id === decoded.id)) return prev;
+            return [{
+              id: decoded.id,
+              target: decoded.target,
+              target_type: decoded.target_type || 'domain',
+              case_name: decoded.case_name || 'Shared Permalinks',
+              created_at: decoded.created_at,
+              status: (decoded.status as any) || 'completed',
+              node_count: decoded.nodes.length,
+              edge_count: decoded.edges.length
+            }, ...prev];
+          });
+        }
+      }
+    };
+
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
   }, []);
 
   // Load cases on mount
@@ -173,6 +214,87 @@ export default function App() {
     }
   };
 
+  // 1-Click Zero-Backend Interactive Permalink Copy
+  const handleCopyPermalink = async () => {
+    if (!activeDetail) return;
+    try {
+      const url = await generatePermalinkUrl(activeDetail);
+      await navigator.clipboard.writeText(url);
+      setPermalinkNotification('PERMALINK COPIED! 100% Client-Side Interactive Link');
+      audioTelemetry.playChirp();
+      setTimeout(() => setPermalinkNotification(null), 3500);
+    } catch (err) {
+      console.error('Failed to copy permalink', err);
+    }
+  };
+
+  // Launch Head-to-Head Cyber Duel
+  const handleLaunchDuel = async (targetA: string, targetB: string) => {
+    setIsLaunching(true);
+    audioTelemetry.playChirp();
+    try {
+      const [resA, resB] = await Promise.all([
+        fetch('/api/investigations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ target: targetA, case_name: `Duel Alpha: ${targetA}` })
+        }),
+        fetch('/api/investigations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ target: targetB, case_name: `Duel Beta: ${targetB}` })
+        })
+      ]);
+
+      if (resA.ok && resB.ok) {
+        const caseA: InvestigationSummary = await resA.json();
+        const caseB: InvestigationSummary = await resB.json();
+        setCases(prev => [caseA, caseB, ...prev]);
+        setActiveCaseId(caseA.id);
+        setViewMode('canvas');
+
+        // Fetch details for duel modal
+        const [detA, detB] = await Promise.all([
+          fetch(`/api/investigations/${caseA.id}`).then(r => r.json()),
+          fetch(`/api/investigations/${caseB.id}`).then(r => r.json())
+        ]);
+        setDuelDetailA(detA);
+        setDuelDetailB(detB);
+        setShowDuelModal(true);
+        audioTelemetry.playLaserSweep();
+      }
+    } catch (err) {
+      console.error('Failed to dispatch cyber duel', err);
+      audioTelemetry.playWarning();
+    } finally {
+      setIsLaunching(false);
+    }
+  };
+
+  // Open duel modal using existing cases or target launcher
+  const handleOpenDuel = async (targetA?: string, targetB?: string) => {
+    if (targetA && targetB) {
+      handleLaunchDuel(targetA, targetB);
+      return;
+    }
+    if (cases.length >= 2) {
+      try {
+        const [detA, detB] = await Promise.all([
+          fetch(`/api/investigations/${cases[0].id}`).then(r => r.json()),
+          fetch(`/api/investigations/${cases[1].id}`).then(r => r.json())
+        ]);
+        setDuelDetailA(detA);
+        setDuelDetailB(detB);
+        setShowDuelModal(true);
+        audioTelemetry.playLaserSweep();
+        return;
+      } catch (e) {
+        console.error('Failed to load duel cases', e);
+      }
+    }
+    setViewMode('launcher');
+  };
+
   const handleSelectRelatedNode = (nodeId: string) => {
     if (!activeDetail) return;
     const match = activeDetail.nodes.find(n => n.id === nodeId);
@@ -252,6 +374,8 @@ export default function App() {
           setSelectedNode(null);
           audioTelemetry.playLaserSweep();
         }}
+        onOpenDuel={() => handleOpenDuel()}
+        onCopyPermalink={handleCopyPermalink}
         onOpenExport={() => setShowExport(true)}
         onOpenScorecard={() => setShowScorecard(true)}
         scorecard={activeDetail?.scorecard}
@@ -296,6 +420,7 @@ export default function App() {
         {viewMode === 'launcher' || !activeCaseId ? (
           <TargetLauncher
             onLaunch={handleLaunch}
+            onLaunchDuel={handleLaunchDuel}
             isLoading={isLaunching}
             analyzers={analyzers}
           />
@@ -499,6 +624,27 @@ export default function App() {
         investigation={activeDetail}
       />
 
+      {/* Head-to-Head Cyber Duel Battle Modal */}
+      <CyberDuelModal
+        isOpen={showDuelModal}
+        onClose={() => setShowDuelModal(false)}
+        investigationA={duelDetailA}
+        investigationB={duelDetailB}
+        onSelectCase={(id) => {
+          setActiveCaseId(id);
+          setViewMode('canvas');
+          audioTelemetry.playLaserSweep();
+        }}
+      />
+
+      {/* Toast Notification Alert (for 1-click Permalink & actions) */}
+      {permalinkNotification && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl bg-cyan-950 border border-cyan-400 text-cyan-200 font-mono text-xs font-bold shadow-[0_0_25px_rgba(6,182,212,0.4)] animate-in fade-in slide-in-from-bottom-4 duration-200 flex items-center gap-3">
+          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+          <span>{permalinkNotification}</span>
+        </div>
+      )}
+
       {/* Quake-Style Command Console (Ctrl+K or ~) */}
       <CommandConsole
         isOpen={isConsoleOpen}
@@ -523,6 +669,8 @@ export default function App() {
         onOpenGhdb={() => setShowGhdb(true)}
         onOpenNotebook={() => setShowNotebook(true)}
         onOpenSocial={() => setShowSocialModal(true)}
+        onOpenDuel={handleOpenDuel}
+        onCopyPermalink={handleCopyPermalink}
       />
     </div>
   );

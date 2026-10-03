@@ -72,6 +72,18 @@ Designed with a high-immersion **tactical cyberpunk HUD**, it combines asynchron
 - **"Roast My Perimeter" AI Meme Critic:** Generates witty, savage, or corporate threat hygiene summaries based on discovered leaks and letter grades (`A+` to `F`).
 - **1-Click Image Clipboard & Viral Tweet:** Uses Clipboard API (`navigator.clipboard.write`) for instant pasting into Twitter/Slack/Discord and pre-fills viral tweet links with badges.
 
+### 14. ⚔️ Head-to-Head "Cyber Duel" Mode (Tale of the Tape)
+- **Direct Perimeter Confrontation:** Launch simultaneous dual-target reconnaissance comparing rival organizations (e.g. `openai.com vs anthropic.com`, `uber.com vs lyft.com`, `tesla.com vs rivian.com`).
+- **Esports Battle Card & Victor Crown:** Side-by-side metrics confrontation comparing Resilience Scores, Origin Cloaking, Dark Web Breaches, and Attack Surface Area with automated AI referee verdict.
+- **1-Click Esports Canvas Battle Card:** Renders 1200x630 split-screen Tale of the Tape card with instant clipboard copy and pre-formatted tweet launch.
+
+### 15. 🔗 Zero-Backend Shareable Permalinks
+- **100% Client-Side State Hydration:** Serializes and gzip-compresses the complete investigation graph directly into a URL hash (`#/share=<compressed_payload>`).
+- **Instant Interactive Load:** Anyone opening the link experiences the full interactive Three.js 3D Threat Globe and Cytoscape graph immediately without requiring an account or database roundtrip.
+
+### 16. 🛡️ Live GitHub README Posture Badges & Embed Studio
+- **Dynamic Posture Badges:** Real-time Shields.io Markdown and custom SVG badges (`[![NexusIntel Posture](...)](...)`) for developers to showcase hardened perimeter security on their GitHub repositories.
+
 ---
 
 ## 🛠 Tech Stack

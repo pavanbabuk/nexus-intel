@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Terminal, Shield, Sparkles, Volume2, VolumeX, Eye, Shuffle, Download, X, Globe, Brain, Search, Columns, Bookmark, Share2 } from 'lucide-react';
+import { Terminal, Shield, Sparkles, Volume2, VolumeX, Eye, Shuffle, Download, X, Globe, Brain, Search, Columns, Bookmark, Share2, Swords, Link2 } from 'lucide-react';
 import { audioTelemetry } from '../utils/audioTelemetry';
 
 interface CommandConsoleProps {
@@ -20,6 +20,8 @@ interface CommandConsoleProps {
   onOpenGhdb?: () => void;
   onOpenNotebook?: () => void;
   onOpenSocial?: () => void;
+  onOpenDuel?: (targetA?: string, targetB?: string) => void;
+  onCopyPermalink?: () => void;
 }
 
 interface CommandSuggestion {
@@ -46,7 +48,9 @@ export const CommandConsole: React.FC<CommandConsoleProps> = ({
   onOpenCortex,
   onOpenGhdb,
   onOpenNotebook,
-  onOpenSocial
+  onOpenSocial,
+  onOpenDuel,
+  onCopyPermalink
 }) => {
   const [input, setInput] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -54,6 +58,18 @@ export const CommandConsole: React.FC<CommandConsoleProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const availableCommands: CommandSuggestion[] = [
+    {
+      command: ':duel',
+      syntax: ':duel [domainA] [domainB]',
+      description: 'Launch Head-to-Head Cyber Duel confrontation (Tale of the Tape)',
+      icon: <Swords className="w-4 h-4 text-rose-400" />
+    },
+    {
+      command: ':permalink',
+      syntax: ':permalink',
+      description: 'Copy zero-backend interactive shareable permalink URL',
+      icon: <Link2 className="w-4 h-4 text-cyan-400" />
+    },
     {
       command: ':scan',
       syntax: ':scan <domain|ip|username|url>',
@@ -211,9 +227,18 @@ export const CommandConsole: React.FC<CommandConsoleProps> = ({
     const verb = parts[0].toLowerCase();
     const arg = parts.slice(1).join(' ').trim();
 
-    audioTelemetry.playChirp();
-
-    if (verb === ':scan') {
+    if (verb === ':duel') {
+      const duelArgs = arg.split(' ').map(s => s.trim()).filter(Boolean);
+      if (onOpenDuel) {
+        onOpenDuel(duelArgs[0], duelArgs[1]);
+      }
+      onClose();
+    } else if (verb === ':permalink' || verb === ':link') {
+      if (onCopyPermalink) {
+        onCopyPermalink();
+      }
+      onClose();
+    } else if (verb === ':scan') {
       if (!arg) {
         setStatusMessage('ERR: Specify target (e.g. :scan example.com)');
         audioTelemetry.playWarning();
