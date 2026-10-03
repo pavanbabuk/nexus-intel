@@ -67,6 +67,11 @@ Designed with a high-immersion **tactical cyberpunk HUD**, it combines asynchron
 ### 12. 🎨 Multi-Palette HUD Theme Engine
 - **4 Operator HUD Themes:** Seamless 1-click toggling between **Cyberpunk Neon**, **Amber Alert NOC**, **Matrix Phosphor**, and **Obsidian Stealth** with matching Web Audio sound frequencies.
 
+### 13. 🖼️ Holographic Social Snapshot Studio (Ray.so for Cyber Recon & Roasting)
+- **1-Click High-Res Canvas Card Generator:** Exports pixel-perfect cards formatted for **X/Twitter & LinkedIn (1200x630)**, **Square (1080x1080)**, or **TikTok/Stories (1080x1920)**.
+- **"Roast My Perimeter" AI Meme Critic:** Generates witty, savage, or corporate threat hygiene summaries based on discovered leaks and letter grades (`A+` to `F`).
+- **1-Click Image Clipboard & Viral Tweet:** Uses Clipboard API (`navigator.clipboard.write`) for instant pasting into Twitter/Slack/Discord and pre-fills viral tweet links with badges.
+
 ---
 
 ## 🛠 Tech Stack

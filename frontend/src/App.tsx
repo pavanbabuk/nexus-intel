@@ -14,6 +14,7 @@ import { GhdbModal } from './components/GhdbModal';
 import { SignalTicker } from './components/SignalTicker';
 import { TimeTravelScrubber } from './components/TimeTravelScrubber';
 import { AnalystNotebook } from './components/AnalystNotebook';
+import { SocialShareModal } from './components/SocialShareModal';
 import { audioTelemetry } from './utils/audioTelemetry';
 import { ThemeMode, getInitialTheme, applyTheme } from './utils/theme';
 import {
@@ -36,6 +37,7 @@ export default function App() {
   const [showCortex, setShowCortex] = useState(false);
   const [showGhdb, setShowGhdb] = useState(false);
   const [showNotebook, setShowNotebook] = useState(false);
+  const [showSocialModal, setShowSocialModal] = useState(false);
   const [pinnedNodes, setPinnedNodes] = useState<EntityNode[]>([]);
   const [isLaunching, setIsLaunching] = useState(false);
   const [viewMode, setViewMode] = useState<'canvas' | 'launcher'>('launcher');
@@ -270,6 +272,7 @@ export default function App() {
         onOpenCortex={() => setShowCortex(true)}
         onOpenGhdb={() => setShowGhdb(true)}
         onOpenNotebook={() => setShowNotebook(true)}
+        onOpenSocial={() => setShowSocialModal(true)}
         pinnedCount={pinnedNodes.length}
         currentTheme={currentTheme}
         onCycleTheme={handleCycleTheme}
@@ -460,6 +463,7 @@ export default function App() {
           target={activeDetail.target}
           isOpen={showScorecard}
           onClose={() => setShowScorecard(false)}
+          onOpenSocial={() => setShowSocialModal(true)}
         />
       )}
 
@@ -488,6 +492,13 @@ export default function App() {
         investigation={activeDetail}
       />
 
+      {/* Holographic Social Snapshot Studio (Viral Card Generator) */}
+      <SocialShareModal
+        isOpen={showSocialModal}
+        onClose={() => setShowSocialModal(false)}
+        investigation={activeDetail}
+      />
+
       {/* Quake-Style Command Console (Ctrl+K or ~) */}
       <CommandConsole
         isOpen={isConsoleOpen}
@@ -511,6 +522,7 @@ export default function App() {
         onOpenCortex={() => setShowCortex(true)}
         onOpenGhdb={() => setShowGhdb(true)}
         onOpenNotebook={() => setShowNotebook(true)}
+        onOpenSocial={() => setShowSocialModal(true)}
       />
     </div>
   );

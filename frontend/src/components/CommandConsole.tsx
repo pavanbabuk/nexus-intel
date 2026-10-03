@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Terminal, Shield, Sparkles, Volume2, VolumeX, Eye, Shuffle, Download, X, Globe, Brain, Search, Columns, Bookmark } from 'lucide-react';
+import { Terminal, Shield, Sparkles, Volume2, VolumeX, Eye, Shuffle, Download, X, Globe, Brain, Search, Columns, Bookmark, Share2 } from 'lucide-react';
 import { audioTelemetry } from '../utils/audioTelemetry';
 
 interface CommandConsoleProps {
@@ -19,6 +19,7 @@ interface CommandConsoleProps {
   onOpenCortex?: () => void;
   onOpenGhdb?: () => void;
   onOpenNotebook?: () => void;
+  onOpenSocial?: () => void;
 }
 
 interface CommandSuggestion {
@@ -44,7 +45,8 @@ export const CommandConsole: React.FC<CommandConsoleProps> = ({
   onSwitchView,
   onOpenCortex,
   onOpenGhdb,
-  onOpenNotebook
+  onOpenNotebook,
+  onOpenSocial
 }) => {
   const [input, setInput] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -57,6 +59,12 @@ export const CommandConsole: React.FC<CommandConsoleProps> = ({
       syntax: ':scan <domain|ip|username|url>',
       description: 'Launch tactical autonomous recon scan against target',
       icon: <Terminal className="w-4 h-4 text-cyan-400" />
+    },
+    {
+      command: ':share',
+      syntax: ':share',
+      description: 'Generate High-Res Holographic Social Card for X/Twitter & LinkedIn',
+      icon: <Share2 className="w-4 h-4 text-purple-400" />
     },
     {
       command: ':split',
@@ -216,6 +224,10 @@ export const CommandConsole: React.FC<CommandConsoleProps> = ({
     } else if (verb === ':ghdb' || verb === ':dork') {
       if (onOpenGhdb) onOpenGhdb();
       setStatusMessage('LAUNCHED GHDB RECON MATRIX');
+      onClose();
+    } else if (verb === ':share') {
+      if (onOpenSocial) onOpenSocial();
+      setStatusMessage('LAUNCHED HOLOGRAPHIC SOCIAL SNAPSHOT STUDIO');
       onClose();
     } else if (verb === ':cortex') {
       if (onOpenCortex) onOpenCortex();

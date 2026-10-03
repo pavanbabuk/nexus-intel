@@ -16,7 +16,8 @@ import {
   Columns,
   Maximize2,
   Bookmark,
-  Palette
+  Palette,
+  Share2
 } from 'lucide-react';
 import { InvestigationSummary, SecurityScorecard } from '../types';
 import { ThemeMode, THEMES } from '../utils/theme';
@@ -45,6 +46,7 @@ interface HeaderProps {
   onOpenCortex?: () => void;
   onOpenGhdb?: () => void;
   onOpenNotebook?: () => void;
+  onOpenSocial?: () => void;
   pinnedCount?: number;
   currentTheme: ThemeMode;
   onCycleTheme: () => void;
@@ -72,6 +74,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenCortex,
   onOpenGhdb,
   onOpenNotebook,
+  onOpenSocial,
   pinnedCount = 0,
   currentTheme,
   onCycleTheme
@@ -292,6 +295,18 @@ export const Header: React.FC<HeaderProps> = ({
                 {pinnedCount}
               </span>
             )}
+          </button>
+        )}
+
+        {/* Viral Holographic Social Share Card Button */}
+        {activeCaseId && onOpenSocial && (
+          <button
+            onClick={onOpenSocial}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono rounded-lg bg-gradient-to-r from-purple-950/90 to-indigo-950/90 hover:from-purple-900 hover:to-indigo-900 border border-purple-500/50 text-purple-200 hover:text-white transition-all shadow-[0_0_12px_rgba(168,85,247,0.25)]"
+            title="Generate & Share High-Res Holographic Social Card (X/Twitter, LinkedIn, Stories)"
+          >
+            <Share2 className="w-3.5 h-3.5 text-purple-300 animate-pulse" />
+            <span className="hidden sm:inline font-bold">SHARE CARD</span>
           </button>
         )}
 

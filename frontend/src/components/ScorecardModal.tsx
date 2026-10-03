@@ -6,7 +6,8 @@ import {
   Twitter,
   Copy,
   Check,
-  Sparkles
+  Sparkles,
+  Share2
 } from 'lucide-react';
 import { SecurityScorecard } from '../types';
 
@@ -15,13 +16,15 @@ interface ScorecardModalProps {
   target: string;
   isOpen: boolean;
   onClose: () => void;
+  onOpenSocial?: () => void;
 }
 
 export const ScorecardModal: React.FC<ScorecardModalProps> = ({
   scorecard,
   target,
   isOpen,
-  onClose
+  onClose,
+  onOpenSocial
 }) => {
   const [copied, setCopied] = useState(false);
   const [filterCategory, setFilterCategory] = useState<string>('all');
@@ -164,6 +167,16 @@ Scan your domain posture: http://localhost:8000`;
 
             {/* Social Share Buttons */}
             <div className="flex items-center gap-2">
+              {onOpenSocial && (
+                <button
+                  onClick={onOpenSocial}
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gradient-to-r from-purple-900/80 to-indigo-900/80 hover:from-purple-800 hover:to-indigo-800 text-purple-200 border border-purple-500/50 shadow-[0_0_10px_rgba(168,85,247,0.3)] transition-all font-bold text-xs"
+                  title="Generate & Share High-Res Holographic Social Card"
+                >
+                  <Share2 className="w-3.5 h-3.5 text-purple-300 animate-pulse" />
+                  <span>Viral Card</span>
+                </button>
+              )}
               <button
                 onClick={handleTweet}
                 className="flex items-center gap-1 px-2.5 py-1 rounded bg-[#1d9bf0]/20 hover:bg-[#1d9bf0]/30 text-[#1d9bf0] border border-[#1d9bf0]/40 transition-colors"
