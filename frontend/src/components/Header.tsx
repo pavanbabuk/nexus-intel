@@ -20,7 +20,8 @@ import {
   Share2,
   Swords,
   Link2,
-  Crosshair
+  Crosshair,
+  User
 } from 'lucide-react';
 import { InvestigationSummary, SecurityScorecard } from '../types';
 import { ThemeMode, THEMES } from '../utils/theme';
@@ -34,6 +35,7 @@ interface HeaderProps {
   onNewInvestigation: () => void;
   onOpenDuel?: () => void;
   onOpenHawk?: () => void;
+  onOpenPersona?: (username?: string) => void;
   onCopyPermalink?: () => void;
   onOpenExport: () => void;
   onOpenScorecard?: () => void;
@@ -65,6 +67,7 @@ export const Header: React.FC<HeaderProps> = ({
   onNewInvestigation,
   onOpenDuel,
   onOpenHawk,
+  onOpenPersona,
   onCopyPermalink,
   onOpenExport,
   onOpenScorecard,
@@ -328,6 +331,18 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <Crosshair className="w-3.5 h-3.5 text-cyan-400 animate-spin" style={{ animationDuration: '10s' }} />
             <span className="hidden sm:inline font-bold">HAWK GEO</span>
+          </button>
+        )}
+
+        {/* Persona & Handle Hunter Button */}
+        {onOpenPersona && (
+          <button
+            onClick={() => onOpenPersona()}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono rounded-lg bg-gradient-to-r from-indigo-950/90 to-purple-950/90 hover:from-indigo-900 hover:to-purple-900 border border-indigo-500/50 text-indigo-200 hover:text-white transition-all shadow-[0_0_12px_rgba(99,102,241,0.25)]"
+            title="Open Sector: Username Research & Persona Hunter (Cross-Platform Footprinting)"
+          >
+            <User className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
+            <span className="hidden sm:inline font-bold">PERSONA HUNTER</span>
           </button>
         )}
 

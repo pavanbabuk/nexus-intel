@@ -92,6 +92,13 @@ Designed with a high-immersion **tactical cyberpunk HUD**, it combines asynchron
 - **1-Click Privacy EXIF Scrubber:** Export sanitized images stripped of GPS tags and device metadata for safe social sharing.
 - **Live Test Presets:** Built-in verified test images for instant demonstration (Eiffel Tower Paris, Times Square NYC, Tokyo Tower Japan).
 
+### 18. 👤 Sector: Username Research & Persona Hunter (North Star Protocol)
+- **High-Velocity Multi-Platform Footprint Audit:** Probes 30+ major platforms concurrently across Developer, AI/Data Science, Gaming/Esports, Fediverse, and Social ecosystems (GitHub, GitLab, DockerHub, HuggingFace, Codeforces, Chess.com, Lichess, Scratch, Mastodon, Telegram, npm, Dev.to, Replit, SoundCloud, and more).
+- **Public Breach Sonar Integration (COMB 3.2 Billion Records):** Real-time queries against the Compilation of Many Breaches index and public stealer telemetry for target handles, displaying leaked accounts and safely masked credentials.
+- **Zero-Knowledge k-Anonymity Password Safety Check:** Client-side SHA-1 hash prefix range lookup against HaveIBeenPwned API (only 5 characters ever leave the browser). Allows users to check if their passwords have been exposed in public breaches with 100% mathematical privacy.
+- **Deep Link Cytoscape Investigation Pivot:** 1-click import from Persona Hunter directly into the interactive topology graph for automated MITRE ATT&CK and threat profiling.
+- **Live Test Presets & Instant Audit:** Instant testing with verified sample handles (`@torvalds`, `@karpathy`, `@gargron`, `@sindresorhus`, `@hikaru`).
+
 ---
 
 ## 🛠 Tech Stack

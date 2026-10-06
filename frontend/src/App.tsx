@@ -17,6 +17,7 @@ import { AnalystNotebook } from './components/AnalystNotebook';
 import { SocialShareModal } from './components/SocialShareModal';
 import { CyberDuelModal } from './components/CyberDuelModal';
 import { HawkModal } from './components/HawkModal';
+import { UsernameResearchModal } from './components/UsernameResearchModal';
 import { audioTelemetry } from './utils/audioTelemetry';
 import { ThemeMode, getInitialTheme, applyTheme } from './utils/theme';
 import { decompressInvestigation, generatePermalinkUrl } from './utils/permalink';
@@ -43,6 +44,8 @@ export default function App() {
   const [showSocialModal, setShowSocialModal] = useState(false);
   const [showDuelModal, setShowDuelModal] = useState(false);
   const [showHawkModal, setShowHawkModal] = useState(false);
+  const [showPersonaModal, setShowPersonaModal] = useState(false);
+  const [personaInitialUser, setPersonaInitialUser] = useState<string>('');
   const [duelDetailA, setDuelDetailA] = useState<InvestigationDetail | null>(null);
   const [duelDetailB, setDuelDetailB] = useState<InvestigationDetail | null>(null);
   const [permalinkNotification, setPermalinkNotification] = useState<string | null>(null);
@@ -378,6 +381,10 @@ export default function App() {
         }}
         onOpenDuel={() => handleOpenDuel()}
         onOpenHawk={() => setShowHawkModal(true)}
+        onOpenPersona={(u) => {
+          setPersonaInitialUser(u || '');
+          setShowPersonaModal(true);
+        }}
         onCopyPermalink={handleCopyPermalink}
         onOpenExport={() => setShowExport(true)}
         onOpenScorecard={() => setShowScorecard(true)}
@@ -425,6 +432,10 @@ export default function App() {
             onLaunch={handleLaunch}
             onLaunchDuel={handleLaunchDuel}
             onOpenHawk={() => setShowHawkModal(true)}
+            onOpenPersona={() => {
+              setPersonaInitialUser('');
+              setShowPersonaModal(true);
+            }}
             isLoading={isLaunching}
             analyzers={analyzers}
           />
@@ -647,6 +658,16 @@ export default function App() {
         onClose={() => setShowHawkModal(false)}
       />
 
+      {/* Sector: Username Research & Persona Hunter Modal */}
+      <UsernameResearchModal
+        isOpen={showPersonaModal}
+        onClose={() => setShowPersonaModal(false)}
+        initialUsername={personaInitialUser}
+        onInvestigateTarget={(u) => {
+          handleLaunch(u, `Persona: ${u}`, analyzers.map(a => a.id));
+        }}
+      />
+
       {/* Toast Notification Alert (for 1-click Permalink & actions) */}
       {permalinkNotification && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl bg-cyan-950 border border-cyan-400 text-cyan-200 font-mono text-xs font-bold shadow-[0_0_25px_rgba(6,182,212,0.4)] animate-in fade-in slide-in-from-bottom-4 duration-200 flex items-center gap-3">
@@ -681,6 +702,10 @@ export default function App() {
         onOpenSocial={() => setShowSocialModal(true)}
         onOpenDuel={handleOpenDuel}
         onOpenHawk={() => setShowHawkModal(true)}
+        onOpenPersona={(u) => {
+          setPersonaInitialUser(u || '');
+          setShowPersonaModal(true);
+        }}
         onCopyPermalink={handleCopyPermalink}
       />
     </div>

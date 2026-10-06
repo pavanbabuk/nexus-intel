@@ -25,22 +25,25 @@ class BreachSonarAnalyzer(BaseAnalyzer):
     id: str = "breach_sonar"
     name: str = "Dark Web & Breach Sonar"
     description: str = "Passive sonar scanning public leak repositories, pastebin dumps, and compromised credential telemetry."
-    supported_targets: List[TargetType] = [TargetType.DOMAIN, TargetType.EMAIL]
+    supported_targets: List[TargetType] = [TargetType.DOMAIN, TargetType.EMAIL, TargetType.USERNAME]
     is_passive: bool = True
 
     async def run(self, target: str, target_type: TargetType, graph: GraphManager) -> None:
-        clean_target = target.strip().lower()
-        root_id = f"{EntityType.DOMAIN.value if target_type == TargetType.DOMAIN else EntityType.ROOT_TARGET.value}:{clean_target}"
+        clean_target = target.strip().lower().lstrip("@")
+        root_id = f"{EntityType.DOMAIN.value if target_type == TargetType.DOMAIN else (EntityType.USERNAME.value if target_type == TargetType.USERNAME else EntityType.ROOT_TARGET.value)}:{clean_target}"
         graph.log(self.id, f"Initializing Dark Web & Breach Sonar audit for [{clean_target}]...")
 
-        async with httpx.AsyncClient(timeout=4.0, follow_redirects=True) as client:
-            # 1. Search public pastebin monitor for domain leaks
+        async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
+            # 1. Search public pastebin monitor for domain/handle leaks
             leaks = await self._search_public_pastes(client, clean_target, graph)
 
-            # 2. Check corporate email breach exposure
+            # 2. Check COMB (Compilation of Many Breaches - 3.2B Records)
+            comb_findings = await self._check_comb_database(client, clean_target, graph)
+
+            # 3. Check HIBP account breach exposure
             compromised_identities = await self._check_breach_telemetry(client, clean_target, graph)
 
-        total_findings = len(leaks) + len(compromised_identities)
+        total_findings = len(leaks) + len(comb_findings) + len(compromised_identities)
 
         if total_findings == 0:
             graph.log(self.id, f"Sonar sweep complete. No active credential dump telemetry identified for [{clean_target}].")
@@ -48,7 +51,7 @@ class BreachSonarAnalyzer(BaseAnalyzer):
 
         graph.log(
             self.id,
-            f"⚠️ DETECTED {total_findings} LEAK RECORD(S) in public dump telemetry for [{clean_target}]!",
+            f"⚠️ DETECTED {total_findings} COMPROMISED RECORD(S) in public dump telemetry for [{clean_target}]!",
             level="WARNING"
         )
 
@@ -58,7 +61,7 @@ class BreachSonarAnalyzer(BaseAnalyzer):
             graph.add_node(
                 node_id=node_id,
                 label=f"Leak: {leak['title']}",
-                entity_type=EntityType.DNS_RECORD,  # mapped to record observable
+                entity_type=EntityType.DNS_RECORD,
                 value=leak["url"],
                 source_module=self.id,
                 confidence=0.88,
@@ -80,6 +83,33 @@ class BreachSonarAnalyzer(BaseAnalyzer):
                 properties={"breach_exposure": True}
             )
 
+        for comb in comb_findings:
+            node_id = f"comb:leak_{comb['id']}"
+            graph.add_node(
+                node_id=node_id,
+                label=f"COMB: {comb['account']}",
+                entity_type=EntityType.USERNAME,
+                value=comb["account"],
+                source_module=self.id,
+                confidence=0.96,
+                properties={
+                    "is_breach": True,
+                    "breach_name": "Compilation of Many Breaches (COMB - 3.2B)",
+                    "threat_severity": "CRITICAL",
+                    "masked_password": comb["masked_password"],
+                    "account": comb["account"]
+                }
+            )
+
+            graph.add_edge(
+                source_id=root_id,
+                target_id=node_id,
+                rel_type=RelationshipType.ASSOCIATED_WITH,
+                source_module=self.id,
+                confidence=0.96,
+                properties={"compromised_credential": True}
+            )
+
         for comp in compromised_identities:
             node_id = f"leak:credential_{comp['email']}"
             graph.add_node(
@@ -93,7 +123,7 @@ class BreachSonarAnalyzer(BaseAnalyzer):
                     "is_breach": True,
                     "breach_name": comp.get("breach_name", "Infostealer Log Dump"),
                     "threat_severity": "CRITICAL",
-                    "malware_family": comp.get("malware_family", "RedLine/Lumma")
+                    "malware_family": comp.get("malware_family", "Account Breach")
                 }
             )
 
@@ -127,11 +157,36 @@ class BreachSonarAnalyzer(BaseAnalyzer):
             pass
         return findings
 
+    async def _check_comb_database(self, client: httpx.AsyncClient, query: str, graph: GraphManager) -> List[Dict[str, Any]]:
+        """Queries the COMB 3.2 Billion credential archive via passive public index."""
+        findings = []
+        try:
+            url = f"https://api.proxynova.com/comb?query={query}"
+            resp = await client.get(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) NexusIntel/1.0"})
+            if resp.status_code == 200:
+                data = resp.json()
+                lines = data.get("lines", [])
+                # Take top 6 matching lines and safely mask passwords
+                for idx, line in enumerate(lines[:6]):
+                    if ":" in line:
+                        acc, pwd = line.split(":", 1)
+                        masked = pwd[:2] + ("*" * max(4, len(pwd) - 2)) if len(pwd) > 2 else "****"
+                    else:
+                        acc = line
+                        masked = "********"
+                    findings.append({
+                        "id": f"{query}_{idx}",
+                        "account": acc,
+                        "masked_password": masked
+                    })
+        except Exception:
+            pass
+        return findings
+
     async def _check_breach_telemetry(self, client: httpx.AsyncClient, domain_or_email: str, graph: GraphManager) -> List[Dict[str, Any]]:
         """Passive lookup for known breach appearances."""
         results = []
         try:
-            # Check HIBP-style public API endpoint
             if "@" in domain_or_email:
                 encoded = domain_or_email
                 url = f"https://haveibeenpwned.com/api/v3/breachedaccount/{encoded}?truncateResponse=false"

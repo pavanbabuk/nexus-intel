@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Terminal, Shield, Sparkles, Volume2, VolumeX, Eye, Shuffle, Download, X, Globe, Brain, Search, Columns, Bookmark, Share2, Swords, Link2, Crosshair } from 'lucide-react';
+import { Terminal, Shield, Sparkles, Volume2, VolumeX, Eye, Shuffle, Download, X, Globe, Brain, Search, Columns, Bookmark, Share2, Swords, Link2, Crosshair, User } from 'lucide-react';
 import { audioTelemetry } from '../utils/audioTelemetry';
 
 interface CommandConsoleProps {
@@ -22,6 +22,7 @@ interface CommandConsoleProps {
   onOpenSocial?: () => void;
   onOpenDuel?: (targetA?: string, targetB?: string) => void;
   onOpenHawk?: () => void;
+  onOpenPersona?: (username?: string) => void;
   onCopyPermalink?: () => void;
 }
 
@@ -52,6 +53,7 @@ export const CommandConsole: React.FC<CommandConsoleProps> = ({
   onOpenSocial,
   onOpenDuel,
   onOpenHawk,
+  onOpenPersona,
   onCopyPermalink
 }) => {
   const [input, setInput] = useState('');
@@ -60,6 +62,12 @@ export const CommandConsole: React.FC<CommandConsoleProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const availableCommands: CommandSuggestion[] = [
+    {
+      command: ':persona',
+      syntax: ':persona [username]',
+      description: 'Open Sector: Username Research & Persona Hunter (North Star Handle Forensics)',
+      icon: <User className="w-4 h-4 text-indigo-400" />
+    },
     {
       command: ':hawk',
       syntax: ':hawk',
@@ -235,7 +243,10 @@ export const CommandConsole: React.FC<CommandConsoleProps> = ({
     const verb = parts[0].toLowerCase();
     const arg = parts.slice(1).join(' ').trim();
 
-    if (verb === ':hawk' || verb === ':geo') {
+    if (verb === ':persona' || verb === ':user') {
+      if (onOpenPersona) onOpenPersona(arg);
+      onClose();
+    } else if (verb === ':hawk' || verb === ':geo') {
       if (onOpenHawk) onOpenHawk();
       onClose();
     } else if (verb === ':duel') {

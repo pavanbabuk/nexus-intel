@@ -17,30 +17,16 @@ PLATFORMS = [
     },
     {
         "name": "GitLab",
-        "url_template": "https://gitlab.com/{username}",
+        "url_template": "https://gitlab.com/api/v4/users?username={username}",
         "profile_url": "https://gitlab.com/{username}",
-        "check_type": "http_status",
+        "check_type": "gitlab_api",
         "category": "Developer"
     },
     {
         "name": "DockerHub",
         "url_template": "https://hub.docker.com/v2/users/{username}/",
         "profile_url": "https://hub.docker.com/u/{username}",
-        "check_type": "json_status",
-        "category": "Developer"
-    },
-    {
-        "name": "Dev.to",
-        "url_template": "https://dev.to/api/users/by_username?url={username}",
-        "profile_url": "https://dev.to/{username}",
-        "check_type": "devto_api",
-        "category": "Blogging"
-    },
-    {
-        "name": "Replit",
-        "url_template": "https://replit.com/@{username}",
-        "profile_url": "https://replit.com/@{username}",
-        "check_type": "http_status",
+        "check_type": "dockerhub_api",
         "category": "Developer"
     },
     {
@@ -51,18 +37,18 @@ PLATFORMS = [
         "category": "Developer"
     },
     {
-        "name": "PyPI",
-        "url_template": "https://pypi.org/user/{username}/",
-        "profile_url": "https://pypi.org/user/{username}/",
-        "check_type": "http_status",
-        "category": "Developer"
+        "name": "Dev.to",
+        "url_template": "https://dev.to/api/users/by_username?url={username}",
+        "profile_url": "https://dev.to/{username}",
+        "check_type": "devto_api",
+        "category": "Blogging & Dev"
     },
     {
-        "name": "Kaggle",
-        "url_template": "https://www.kaggle.com/{username}",
-        "profile_url": "https://www.kaggle.com/{username}",
-        "check_type": "http_status",
-        "category": "Data Science"
+        "name": "Replit",
+        "url_template": "https://replit.com/@{username}",
+        "profile_url": "https://replit.com/@{username}",
+        "check_type": "replit_check",
+        "category": "Developer"
     },
 
     # Security & Identity
@@ -78,37 +64,55 @@ PLATFORMS = [
         "url_template": "https://hacker-news.firebaseio.com/v0/user/{username}.json",
         "profile_url": "https://news.ycombinator.com/user?id={username}",
         "check_type": "hn_api",
-        "category": "Tech Forum"
-    },
-    {
-        "name": "Pastebin",
-        "url_template": "https://pastebin.com/u/{username}",
-        "profile_url": "https://pastebin.com/u/{username}",
-        "check_type": "http_status",
-        "category": "Leaks & Code"
+        "category": "Tech & News"
     },
 
-    # Social & Content
+    # AI, Data Science & Contests
     {
-        "name": "Medium",
-        "url_template": "https://medium.com/@{username}",
-        "profile_url": "https://medium.com/@{username}",
-        "check_type": "http_status",
-        "category": "Blogging"
+        "name": "HuggingFace",
+        "url_template": "https://huggingface.co/api/users/{username}/overview",
+        "profile_url": "https://huggingface.co/{username}",
+        "check_type": "huggingface_api",
+        "category": "AI & Machine Learning"
     },
     {
-        "name": "Substack",
-        "url_template": "https://{username}.substack.com/",
-        "profile_url": "https://{username}.substack.com/",
-        "check_type": "http_status",
-        "category": "Publishing"
+        "name": "Codeforces",
+        "url_template": "https://codeforces.com/api/user.info?handles={username}",
+        "profile_url": "https://codeforces.com/profile/{username}",
+        "check_type": "codeforces_api",
+        "category": "Competitive Programming"
+    },
+
+    # Gaming & Esports
+    {
+        "name": "Chess.com",
+        "url_template": "https://api.chess.com/pub/player/{username}",
+        "profile_url": "https://www.chess.com/member/{username}",
+        "check_type": "chess_api",
+        "category": "Gaming & Esports"
     },
     {
-        "name": "Reddit",
-        "url_template": "https://www.reddit.com/user/{username}/about.json",
-        "profile_url": "https://www.reddit.com/user/{username}",
-        "check_type": "reddit_api",
-        "category": "Community"
+        "name": "Lichess",
+        "url_template": "https://lichess.org/api/user/{username}",
+        "profile_url": "https://lichess.org/@/{username}",
+        "check_type": "lichess_api",
+        "category": "Gaming & Esports"
+    },
+
+    # Creative, Media & Social
+    {
+        "name": "Scratch",
+        "url_template": "https://api.scratch.mit.edu/users/{username}",
+        "profile_url": "https://scratch.mit.edu/users/{username}",
+        "check_type": "scratch_api",
+        "category": "Creative Coding"
+    },
+    {
+        "name": "Mastodon",
+        "url_template": "https://mastodon.social/api/v1/accounts/lookup?acct={username}",
+        "profile_url": "https://mastodon.social/@{username}",
+        "check_type": "mastodon_api",
+        "category": "Fediverse & Social"
     },
     {
         "name": "Telegram",
@@ -118,11 +122,18 @@ PLATFORMS = [
         "category": "Messaging"
     },
     {
-        "name": "Linktree",
-        "url_template": "https://linktr.ee/{username}",
-        "profile_url": "https://linktr.ee/{username}",
-        "check_type": "http_status",
-        "category": "Identity"
+        "name": "SoundCloud",
+        "url_template": "https://soundcloud.com/{username}",
+        "profile_url": "https://soundcloud.com/{username}",
+        "check_type": "soundcloud_check",
+        "category": "Audio & Streaming"
+    },
+    {
+        "name": "Disqus",
+        "url_template": "https://disqus.com/by/{username}/",
+        "profile_url": "https://disqus.com/by/{username}/",
+        "check_type": "disqus_check",
+        "category": "Community & Forums"
     }
 ]
 
@@ -169,19 +180,40 @@ class UsernameAnalyzer(BaseAnalyzer):
             details: Dict[str, Any] = {}
             avatar_url: Optional[str] = None
 
-            if p["check_type"] == "http_status":
-                if resp.status_code == 200 and "Not Found" not in resp.text[:500]:
-                    is_found = True
-
-            elif p["check_type"] == "github_api":
+            if p["check_type"] == "github_api":
                 if resp.status_code == 200:
                     data = resp.json()
-                    is_found = bool(data and not data.get("message") == "Not Found")
+                    is_found = bool(data and data.get("login"))
                     if is_found:
                         details["name"] = data.get("name")
                         details["bio"] = data.get("bio")
                         details["public_repos"] = data.get("public_repos")
                         avatar_url = data.get("avatar_url")
+
+            elif p["check_type"] == "gitlab_api":
+                if resp.status_code == 200:
+                    data = resp.json()
+                    if isinstance(data, list) and len(data) > 0:
+                        is_found = True
+                        user_obj = data[0]
+                        details["name"] = user_obj.get("name")
+                        details["state"] = user_obj.get("state")
+                        avatar_url = user_obj.get("avatar_url")
+
+            elif p["check_type"] == "dockerhub_api":
+                if resp.status_code == 200:
+                    data = resp.json()
+                    is_found = bool(data and not data.get("message"))
+                    if is_found:
+                        details["full_name"] = data.get("full_name")
+
+            elif p["check_type"] == "npm_api":
+                if resp.status_code == 200:
+                    data = resp.json()
+                    total = data.get("total", 0)
+                    is_found = total > 0
+                    if is_found:
+                        details["packages_count"] = total
 
             elif p["check_type"] == "devto_api":
                 if resp.status_code == 200:
@@ -192,33 +224,16 @@ class UsernameAnalyzer(BaseAnalyzer):
                         details["summary"] = data.get("summary")
                         avatar_url = data.get("profile_image")
 
-            elif p["check_type"] == "json_status":
-                if resp.status_code == 200:
-                    data = resp.json()
-                    is_found = bool(data and not data.get("message") == "Not Found")
+            elif p["check_type"] == "replit_check":
+                if resp.status_code == 200 and "profile-page" in resp.text.lower():
+                    is_found = True
 
             elif p["check_type"] == "hn_api":
                 if resp.status_code == 200 and resp.text.strip() != "null":
                     is_found = True
                     data = resp.json()
                     details["karma"] = data.get("karma")
-
-            elif p["check_type"] == "npm_api":
-                if resp.status_code == 200:
-                    data = resp.json()
-                    is_found = data.get("total", 0) > 0
-
-            elif p["check_type"] == "reddit_api":
-                if resp.status_code == 200:
-                    data = resp.json().get("data", {})
-                    if not data.get("is_suspended") and data.get("name"):
-                        is_found = True
-                        details["total_karma"] = data.get("total_karma")
-                        avatar_url = data.get("icon_img")
-
-            elif p["check_type"] == "telegram_check":
-                if resp.status_code == 200 and "tgme_page_extra" in resp.text and "If you have Telegram" in resp.text:
-                    is_found = True
+                    details["about"] = (data.get("about") or "")[:120]
 
             elif p["check_type"] == "keybase_api":
                 if resp.status_code == 200:
@@ -228,6 +243,72 @@ class UsernameAnalyzer(BaseAnalyzer):
                         is_found = True
                         pics = thems[0].get("pictures", {}).get("primary", {})
                         avatar_url = pics.get("url")
+
+            elif p["check_type"] == "huggingface_api":
+                if resp.status_code == 200:
+                    data = resp.json()
+                    if "type" in data and not data.get("error"):
+                        is_found = True
+                        details["num_likes"] = data.get("numLikes")
+                        avatar_url = data.get("avatarUrl")
+
+            elif p["check_type"] == "codeforces_api":
+                if resp.status_code == 200:
+                    data = resp.json()
+                    if data.get("status") == "OK" and data.get("result"):
+                        is_found = True
+                        user_info = data["result"][0]
+                        details["rating"] = user_info.get("rating")
+                        details["rank"] = user_info.get("rank")
+                        avatar_url = user_info.get("titlePhoto")
+
+            elif p["check_type"] == "chess_api":
+                if resp.status_code == 200:
+                    data = resp.json()
+                    if data.get("username"):
+                        is_found = True
+                        details["name"] = data.get("name")
+                        details["title"] = data.get("title")
+                        avatar_url = data.get("avatar")
+
+            elif p["check_type"] == "lichess_api":
+                if resp.status_code == 200:
+                    data = resp.json()
+                    if data.get("id"):
+                        is_found = True
+                        details["bio"] = data.get("profile", {}).get("bio")
+
+            elif p["check_type"] == "scratch_api":
+                if resp.status_code == 200:
+                    data = resp.json()
+                    if data.get("username"):
+                        is_found = True
+                        images = data.get("profile", {}).get("images", {})
+                        avatar_url = images.get("90x90") or images.get("60x60")
+
+            elif p["check_type"] == "mastodon_api":
+                if resp.status_code == 200:
+                    data = resp.json()
+                    if data.get("username"):
+                        is_found = True
+                        details["display_name"] = data.get("display_name")
+                        avatar_url = data.get("avatar")
+
+            elif p["check_type"] == "telegram_check":
+                if resp.status_code == 200 and "tgme_page_extra" in resp.text:
+                    is_found = True
+                    import re
+                    photo_m = re.search(r'class="tgme_page_photo_image" src="([^"]+)"', resp.text)
+                    if photo_m:
+                        avatar_url = photo_m.group(1)
+
+            elif p["check_type"] == "soundcloud_check":
+                if resp.status_code == 200:
+                    is_found = True
+
+            elif p["check_type"] == "disqus_check":
+                if resp.status_code == 200:
+                    is_found = True
 
             if is_found:
                 return {

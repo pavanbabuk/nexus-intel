@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Sparkles, Sliders, CheckCircle2, Circle, Swords, Crosshair } from 'lucide-react';
+import { Search, Sparkles, Sliders, CheckCircle2, Circle, Swords, Crosshair, User } from 'lucide-react';
 import { TargetType, AnalyzerInfo } from '../types';
 
 interface TargetLauncherProps {
   onLaunch: (target: string, caseName: string, enabledAnalyzers: string[]) => void;
   onLaunchDuel?: (targetA: string, targetB: string) => void;
   onOpenHawk?: () => void;
+  onOpenPersona?: () => void;
   isLoading: boolean;
   analyzers: AnalyzerInfo[];
 }
@@ -14,6 +15,7 @@ export const TargetLauncher: React.FC<TargetLauncherProps> = ({
   onLaunch, 
   onLaunchDuel, 
   onOpenHawk,
+  onOpenPersona,
   isLoading, 
   analyzers 
 }) => {
@@ -137,6 +139,17 @@ export const TargetLauncher: React.FC<TargetLauncherProps> = ({
             >
               <Crosshair className="w-3.5 h-3.5 animate-spin" style={{ animationDuration: '10s' }} />
               <span>Hawk Geolocation</span>
+            </button>
+          )}
+          {onOpenPersona && (
+            <button
+              type="button"
+              onClick={onOpenPersona}
+              className="flex items-center gap-2 px-4 py-1.5 rounded-md text-xs font-mono font-bold text-indigo-400 hover:text-white hover:bg-indigo-950/60 transition-all border border-transparent hover:border-indigo-500/30"
+              title="Open Sector: Username Research & Persona Hunter"
+            >
+              <User className="w-3.5 h-3.5 animate-pulse" />
+              <span>Persona Hunter</span>
             </button>
           )}
         </div>
