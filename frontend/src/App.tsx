@@ -16,6 +16,7 @@ import { TimeTravelScrubber } from './components/TimeTravelScrubber';
 import { AnalystNotebook } from './components/AnalystNotebook';
 import { SocialShareModal } from './components/SocialShareModal';
 import { CyberDuelModal } from './components/CyberDuelModal';
+import { HawkModal } from './components/HawkModal';
 import { audioTelemetry } from './utils/audioTelemetry';
 import { ThemeMode, getInitialTheme, applyTheme } from './utils/theme';
 import { decompressInvestigation, generatePermalinkUrl } from './utils/permalink';
@@ -41,6 +42,7 @@ export default function App() {
   const [showNotebook, setShowNotebook] = useState(false);
   const [showSocialModal, setShowSocialModal] = useState(false);
   const [showDuelModal, setShowDuelModal] = useState(false);
+  const [showHawkModal, setShowHawkModal] = useState(false);
   const [duelDetailA, setDuelDetailA] = useState<InvestigationDetail | null>(null);
   const [duelDetailB, setDuelDetailB] = useState<InvestigationDetail | null>(null);
   const [permalinkNotification, setPermalinkNotification] = useState<string | null>(null);
@@ -375,6 +377,7 @@ export default function App() {
           audioTelemetry.playLaserSweep();
         }}
         onOpenDuel={() => handleOpenDuel()}
+        onOpenHawk={() => setShowHawkModal(true)}
         onCopyPermalink={handleCopyPermalink}
         onOpenExport={() => setShowExport(true)}
         onOpenScorecard={() => setShowScorecard(true)}
@@ -421,6 +424,7 @@ export default function App() {
           <TargetLauncher
             onLaunch={handleLaunch}
             onLaunchDuel={handleLaunchDuel}
+            onOpenHawk={() => setShowHawkModal(true)}
             isLoading={isLaunching}
             analyzers={analyzers}
           />
@@ -637,6 +641,12 @@ export default function App() {
         }}
       />
 
+      {/* Hawk Image Geolocation & Visual Forensics Modal (North Star Protocol) */}
+      <HawkModal
+        isOpen={showHawkModal}
+        onClose={() => setShowHawkModal(false)}
+      />
+
       {/* Toast Notification Alert (for 1-click Permalink & actions) */}
       {permalinkNotification && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl bg-cyan-950 border border-cyan-400 text-cyan-200 font-mono text-xs font-bold shadow-[0_0_25px_rgba(6,182,212,0.4)] animate-in fade-in slide-in-from-bottom-4 duration-200 flex items-center gap-3">
@@ -670,6 +680,7 @@ export default function App() {
         onOpenNotebook={() => setShowNotebook(true)}
         onOpenSocial={() => setShowSocialModal(true)}
         onOpenDuel={handleOpenDuel}
+        onOpenHawk={() => setShowHawkModal(true)}
         onCopyPermalink={handleCopyPermalink}
       />
     </div>

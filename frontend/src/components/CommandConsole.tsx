@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Terminal, Shield, Sparkles, Volume2, VolumeX, Eye, Shuffle, Download, X, Globe, Brain, Search, Columns, Bookmark, Share2, Swords, Link2 } from 'lucide-react';
+import { Terminal, Shield, Sparkles, Volume2, VolumeX, Eye, Shuffle, Download, X, Globe, Brain, Search, Columns, Bookmark, Share2, Swords, Link2, Crosshair } from 'lucide-react';
 import { audioTelemetry } from '../utils/audioTelemetry';
 
 interface CommandConsoleProps {
@@ -21,6 +21,7 @@ interface CommandConsoleProps {
   onOpenNotebook?: () => void;
   onOpenSocial?: () => void;
   onOpenDuel?: (targetA?: string, targetB?: string) => void;
+  onOpenHawk?: () => void;
   onCopyPermalink?: () => void;
 }
 
@@ -50,6 +51,7 @@ export const CommandConsole: React.FC<CommandConsoleProps> = ({
   onOpenNotebook,
   onOpenSocial,
   onOpenDuel,
+  onOpenHawk,
   onCopyPermalink
 }) => {
   const [input, setInput] = useState('');
@@ -58,6 +60,12 @@ export const CommandConsole: React.FC<CommandConsoleProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const availableCommands: CommandSuggestion[] = [
+    {
+      command: ':hawk',
+      syntax: ':hawk',
+      description: 'Open Hawk Image Geolocation & Visual Metadata Forensics (North Star Protocol)',
+      icon: <Crosshair className="w-4 h-4 text-cyan-400" />
+    },
     {
       command: ':duel',
       syntax: ':duel [domainA] [domainB]',
@@ -227,7 +235,10 @@ export const CommandConsole: React.FC<CommandConsoleProps> = ({
     const verb = parts[0].toLowerCase();
     const arg = parts.slice(1).join(' ').trim();
 
-    if (verb === ':duel') {
+    if (verb === ':hawk' || verb === ':geo') {
+      if (onOpenHawk) onOpenHawk();
+      onClose();
+    } else if (verb === ':duel') {
       const duelArgs = arg.split(' ').map(s => s.trim()).filter(Boolean);
       if (onOpenDuel) {
         onOpenDuel(duelArgs[0], duelArgs[1]);

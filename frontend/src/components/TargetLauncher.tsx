@@ -5,6 +5,7 @@ import { TargetType, AnalyzerInfo } from '../types';
 interface TargetLauncherProps {
   onLaunch: (target: string, caseName: string, enabledAnalyzers: string[]) => void;
   onLaunchDuel?: (targetA: string, targetB: string) => void;
+  onOpenHawk?: () => void;
   isLoading: boolean;
   analyzers: AnalyzerInfo[];
 }
@@ -12,6 +13,7 @@ interface TargetLauncherProps {
 export const TargetLauncher: React.FC<TargetLauncherProps> = ({ 
   onLaunch, 
   onLaunchDuel, 
+  onOpenHawk,
   isLoading, 
   analyzers 
 }) => {
@@ -126,6 +128,17 @@ export const TargetLauncher: React.FC<TargetLauncherProps> = ({
             <Swords className="w-3.5 h-3.5" />
             <span>Cyber Duel (VS)</span>
           </button>
+          {onOpenHawk && (
+            <button
+              type="button"
+              onClick={onOpenHawk}
+              className="flex items-center gap-2 px-4 py-1.5 rounded-md text-xs font-mono font-bold text-cyan-400 hover:text-white hover:bg-cyan-950/60 transition-all border border-transparent hover:border-cyan-500/30"
+              title="Open Hawk Image Geolocation & Visual Metadata Forensics"
+            >
+              <Crosshair className="w-3.5 h-3.5 animate-spin" style={{ animationDuration: '10s' }} />
+              <span>Hawk Geolocation</span>
+            </button>
+          )}
         </div>
       </div>
 

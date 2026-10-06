@@ -84,6 +84,14 @@ Designed with a high-immersion **tactical cyberpunk HUD**, it combines asynchron
 ### 16. 🛡️ Live GitHub README Posture Badges & Embed Studio
 - **Dynamic Posture Badges:** Real-time Shields.io Markdown and custom SVG badges (`[![NexusIntel Posture](...)](...)`) for developers to showcase hardened perimeter security on their GitHub repositories.
 
+### 17. 🦅 Sector Hawk: Image Geolocation & Visual Forensics (North Star Protocol)
+- **100% Client-Side EXIF Binary Forensics:** Pure TypeScript parser extracting exact satellite GPS coordinates, altitude, camera make/model, aperture, focal length, ISO, and capture timestamp directly from raw image bytes.
+- **Solar Astronomy & Shadow Math:** Calculates solar azimuth and elevation angles using date/coordinates to determine expected shadow directions and scientifically verify photo authenticity.
+- **Interactive OpenStreetMap Embed & Reverse Geocoding:** Auto-resolves street address, neighborhood, and city, with 1-click links to Google Maps, Google Earth 3D, and OpenStreetMap.
+- **Reverse Visual Search Matrix:** 1-click launchers for **Google Lens, Yandex Visual (landmark & facial matcher), Bing Visual, and TinEye**.
+- **1-Click Privacy EXIF Scrubber:** Export sanitized images stripped of GPS tags and device metadata for safe social sharing.
+- **Live Test Presets:** Built-in verified test images for instant demonstration (Eiffel Tower Paris, Times Square NYC, Tokyo Tower Japan).
+
 ---
 
 ## 🛠 Tech Stack

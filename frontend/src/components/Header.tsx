@@ -19,7 +19,8 @@ import {
   Palette,
   Share2,
   Swords,
-  Link2
+  Link2,
+  Crosshair
 } from 'lucide-react';
 import { InvestigationSummary, SecurityScorecard } from '../types';
 import { ThemeMode, THEMES } from '../utils/theme';
@@ -32,6 +33,7 @@ interface HeaderProps {
   onSelectCase: (id: string) => void;
   onNewInvestigation: () => void;
   onOpenDuel?: () => void;
+  onOpenHawk?: () => void;
   onCopyPermalink?: () => void;
   onOpenExport: () => void;
   onOpenScorecard?: () => void;
@@ -62,6 +64,7 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectCase,
   onNewInvestigation,
   onOpenDuel,
+  onOpenHawk,
   onCopyPermalink,
   onOpenExport,
   onOpenScorecard,
@@ -313,6 +316,18 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <Swords className="w-3.5 h-3.5 text-rose-400 animate-pulse" />
             <span className="hidden sm:inline font-bold">DUEL</span>
+          </button>
+        )}
+
+        {/* Hawk Image Geolocation Button */}
+        {onOpenHawk && (
+          <button
+            onClick={onOpenHawk}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono rounded-lg bg-gradient-to-r from-cyan-950/90 to-blue-950/90 hover:from-cyan-900 hover:to-blue-900 border border-cyan-500/50 text-cyan-200 hover:text-white transition-all shadow-[0_0_12px_rgba(6,182,212,0.25)]"
+            title="Open Hawk Image Geolocation & Visual Metadata Forensics (North Star Protocol)"
+          >
+            <Crosshair className="w-3.5 h-3.5 text-cyan-400 animate-spin" style={{ animationDuration: '10s' }} />
+            <span className="hidden sm:inline font-bold">HAWK GEO</span>
           </button>
         )}
 
